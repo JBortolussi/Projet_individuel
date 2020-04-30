@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-from .models import Projet
+from .models import Projet, Task
 
 
 def connexion(request):
@@ -37,7 +37,7 @@ def deconnexion(request):
     return HttpResponseRedirect(reverse(connexion))
 
 @login_required()
-def project_view(request):
+def projects_view(request):
     projects = request.user.projets.all()
     return render(request, 'projects.html', locals())
 
@@ -86,3 +86,12 @@ def edit_project_view(request, id):
 
     return redirect("projects")
 
+
+@login_required()
+def project_view(request, id):
+    project = get_object_or_404(Projet, id=id)
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        tasks = Task.objects.filter(projet__id__exact=project.id)
+        return render(request, 'project.html', locals())
+    else:
+        return redirect("projects")

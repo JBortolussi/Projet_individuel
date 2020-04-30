@@ -15,7 +15,7 @@
     <ul class="list-group">
         {% for project in projects %}
         <li class="list-group-item list-group-item-action">
-            {{project.name}}
+            <a class="custom_link" href="{% url "project" project.id %}" >{{project.name}}</a>
             <a class="custom_link" href="{% url "delete_project" project.id %}">
                 <i data-toggle="tooltip" data-placement="left" title="Suprimer projet" class="fas fa-times-circle fa-2x" style="float: right;color: tomato;"></i>
             </a>

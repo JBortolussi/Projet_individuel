@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %} {{project.name}} {% endblock %}
+{% block line_path %}
+    <a class="custom_link" href="{% url "projects" %}"> Projets </a>
+    /
+    <a class="custom_link" href="{% url "project" project.id %}"> {{project.name}} </a>
+{% endblock %}
+
+{% block page %}
+<br>
+
+<h1 style="display: inline">{{project.name}}</h1>
+<a class="custom_link" href="{% url "new_project" %}">
+    <i data-toggle="tooltip" data-placement="left" title="Ajouter un projet" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
+</a>
+
+
+
+<div class="container-fluid" style="margin-top: 1%">
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Assignee</th>
+            <th>Start Date</th>
+            <th>Due Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for task in tasks %}
+            <tr>
+                <td>{{task.name}}</td>
+                {% if not task.assignee.last_name %}
+                    <td>{{task.user.username}}<span class="badge badge-primary">{{task.assignee.username}}</span></td>
+                {% else %}
+                    <td><span class="badge badge-primary">{{task.assignee.first_name}} {{task.assignee.last_name}}</span></td>
+                {% endif %}
+                <td>{{task.start_date}}</td>
+                <td>{{task.due_date}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+</div>
+</div>
+{% endblock %}
