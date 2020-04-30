@@ -6,9 +6,11 @@ from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.db.models.signals import pre_save, m2m_changed, pre_delete
-
+from django.utils import timezone
 
 # Create your models here.
+from projet import settings
+
 
 class ProjetAdmin(admin.ModelAdmin):
     # configuration vue projet dans Admin
@@ -64,7 +66,7 @@ class Task(models.Model):
     start_date = models.DateField()
     due_date = models.DateField()
     priority = models.IntegerField()
-    status = models.ForeignKey('status', on_delete=models.SET_NULL, null=True)
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.name
@@ -72,6 +74,31 @@ class Task(models.Model):
     def clean(self):
         if self.assignee not in self.projet.members.all():
             raise ValidationError("Il faut que la perssonne à qui on assigne la tâche soit membre du projet")
+
+
+class Journal(models.Model):
+    date = models.DateTimeField(default=timezone.now, verbose_name="Date de parution", blank=True)
+    entry = models.CharField(max_length=160)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    task = models.ForeignKey('Task', on_delete=models.CASCADE, null=True, blank=True)
+
+
+class JournalAdmin(admin.ModelAdmin):
+    list_display = ('author', 'date', 'apercu_entry', 'task',)
+    list_filter = ('author', 'date',)
+    date_hierarchy = 'date'
+    ordering = ('date',)
+
+    def apercu_entry(self, journal):
+        """
+        Retourne les 40 premiers caractères de la description. S'il
+        y a plus de 40 caractères, il faut rajouter des points de suspension.
+        """
+        text = journal.entry[0:40]
+        if len(journal.entry) > 40:
+            return '%s…' % text
+        else:
+            return text
 
 
 @receiver(m2m_changed, sender=Projet.members.through)

@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
-from .forms import ConnexionForm, ProjectForm
+from .forms import ConnexionForm, ProjectForm, JournalForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-from .models import Projet, Task
+from .models import Projet, Task, Journal
 
 
 def connexion(request):
@@ -97,13 +97,21 @@ def project_view(request, id):
         return redirect("projects")
 
 @login_required()
-def task_view(request, project_id, task_id):
-    project = get_object_or_404(Projet, id=project_id)
+def task_view(request, task_id):
+    task = get_object_or_404(Task, id=task_id)
+    project = task.projet
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-        task= get_object_or_404(Task, id=task_id)
-        if (task.projet.id == project_id):
+            entries = Journal.objects.filter(task__id=task_id)
+            if (request.method == "POST"):
+                form = JournalForm(request.POST)
+                if (form.is_valid()):
+                    journal = form.save(commit=False)
+                    journal.task=task
+                    journal.author = request.user
+                    journal.save()
+            else:
+
+                form = JournalForm()
             return render(request, "task.html", locals())
-        else:
-            return redirect("project", id=project_id)
     else:
-        return redirect("project", id=project_id)
+        return redirect("project", id=project.id)

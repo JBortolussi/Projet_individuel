@@ -1,3 +1,12 @@
 .custom_link {
     color: dodgerblue;
 }
+.active {
+    display: none;
+}
+.inline {
+    display: inline;
+}
+.form-inline {
+    display: inline;
+}

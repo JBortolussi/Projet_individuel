@@ -30,7 +30,7 @@
     <tbody>
         {% for task in tasks %}
             <tr>
-                <td><a class="custom_link" href="{% url "task" project.id task.id %}">{{task.name}}</a> </td>
+                <td><a class="custom_link" href="{% url "task" task.id %}">{{task.name}}</a> </td>
                 {% if task.assignee == None %}
                     <td><span class="badge badge-danger">Personne</span></td>
                 {% else %}

@@ -5,17 +5,17 @@
     /
     <a class="custom_link" href="{% url "project" project.id %}"> {{project.name}} </a>
     /
-    <a class="custom_link" href="{% url "task" project.id task.id%}"> {{task.name}} </a>
+    <a class="custom_link" href="{% url "task" task.id%}"> {{task.name}} </a>
 {% endblock %}
 
 {% block page %}
 <br>
 
-<h1 style="display: inline">{{task.name}}</h1>
+<h1 style="display: inline">{{project.name}}</h1>
 <a class="custom_link" href="{% url "project" project.id%}">
     <i data-toggle="tooltip" data-placement="left" title="Retour au projet" class="fas fa-backspace fa-3x" style="float: right;color: tomato;"></i>
 </a>
-
+<h3>{{task.name}}</h3>
 
 
 <div class="container-fluid" style="margin-top: 1%">
@@ -48,6 +48,67 @@
         </tr>
     </tbody>
 </table>
-
+<h6>History</h6>
+<table class="table">
+    <tbody>
+    {% for entry in entries %}
+        <tr>
+            <td style="width: 50%">
+                {% if not entry.author.last_name %}
+                    <span class="badge badge-primary">{{entry.author.username}}</span>
+                {% else %}
+                    <span class="badge badge-primary">{{entry.author.first_name}} {{entry.author.last_name}}</span>
+                {% endif %}
+                {{entry.date}}
+            </td>
+            <td style="width: 50%">
+                {{entry.entry}}
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+    <i  id="CA" data-toggle="tooltip" data-placement="left" title="Ajouter une information" class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
+    <div id="db" class="row active">
+        <div class="col-sm-1">
+            <i id="CB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x" style="display: inline;color: tomato;"></i>
+        </div>
+        <div class="col-sm-11">
+            <form method="post" action="{% url "task" task.id %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div style="float: left">
+                        <button type="submit" class="btn btn-primary" style="display: inline">Envoyer</button>
+                    </div>
+                    <div style="flex-grow: 1">
+                        <div class="form-group">
+                            <input  type="text" class="form-control" name="entry" placeholder="Message">
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
+{% endblock %}
+{% block scriptBase %}
+<!--<script>-->
+    let CA=document.getElementById("CA");
+    let CB=document.getElementById("CB");
+    let DB=document.getElementById("db");
+
+    function toggA(){
+        DB.classList.toggle("active");
+        CA.classList.toggle("active");
+    };
+    CA.onclick=toggA;
+
+    function toggB(){
+        CA.classList.toggle("active");
+        DB.classList.toggle("active");
+    };
+    CB.onclick=toggB;
+
+<!--//</script>-->
+
 {% endblock %}
