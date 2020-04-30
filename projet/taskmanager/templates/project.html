@@ -30,12 +30,17 @@
     <tbody>
         {% for task in tasks %}
             <tr>
-                <td>{{task.name}}</td>
-                {% if not task.assignee.last_name %}
-                    <td>{{task.user.username}}<span class="badge badge-primary">{{task.assignee.username}}</span></td>
+                <td><a class="custom_link" href="{% url "task" project.id task.id %}">{{task.name}}</a> </td>
+                {% if task.assignee == None %}
+                    <td><span class="badge badge-danger">Personne</span></td>
                 {% else %}
-                    <td><span class="badge badge-primary">{{task.assignee.first_name}} {{task.assignee.last_name}}</span></td>
+                    {% if not task.assignee.last_name %}
+                        <td><span class="badge badge-primary">{{task.assignee.username}}</span></td>
+                    {% else %}
+                        <td><span class="badge badge-primary">{{task.assignee.first_name}} {{task.assignee.last_name}}</span></td>
+                    {% endif %}
                 {% endif %}
+
                 <td>{{task.start_date}}</td>
                 <td>{{task.due_date}}</td>
             </tr>
@@ -43,6 +48,5 @@
     </tbody>
 </table>
 
-</div>
 </div>
 {% endblock %}

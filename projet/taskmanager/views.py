@@ -95,3 +95,15 @@ def project_view(request, id):
         return render(request, 'project.html', locals())
     else:
         return redirect("projects")
+
+@login_required()
+def task_view(request, project_id, task_id):
+    project = get_object_or_404(Projet, id=project_id)
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        task= get_object_or_404(Task, id=task_id)
+        if (task.projet.id == project_id):
+            return render(request, "task.html", locals())
+        else:
+            return redirect("project", id=project_id)
+    else:
+        return redirect("project", id=project_id)
