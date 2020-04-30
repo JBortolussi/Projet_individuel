@@ -1,10 +1,30 @@
 {% extends "base.html" %}
 {% block title %} Project {% endblock %}
 {% block line_path %}
-    <a class="custom_link" href="{% url "project" %}">Projets</a>
+    <a class="custom_link" href="{% url "projects" %}">Projets</a>
 {% endblock %}
 
 {% block page %}
 <br>
-<h1>Projets</h1>
+<h1 style="display: inline">Projets</h1>
+<a class="custom_link" href="{% url "new_project" %}">
+    <i data-toggle="tooltip" data-placement="left" title="Ajouter un projet" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
+</a>
+<div class="container-fluid" style="margin-top: 1%">
+
+    <ul class="list-group">
+        {% for project in projects %}
+        <li class="list-group-item list-group-item-action">
+            {{project.name}}
+            <a class="custom_link" href="{% url "delete_project" project.id %}">
+                <i data-toggle="tooltip" data-placement="left" title="Suprimer projet" class="fas fa-times-circle fa-2x" style="float: right;color: tomato;"></i>
+            </a>
+            <a class="custom_link" style="margin-right: 1%;display: inline-block; float:right" href="{% url "edit_project" project.id %}">
+                <i data-toggle="tooltip" data-placement="left" title="Editer projet" class="fas fa-edit fa-2x" style="float: right;color: dodgerblue;"></i>
+            </a>
+        </li>
+        {% endfor %}
+    </ul>
+
+</div>
 {% endblock %}

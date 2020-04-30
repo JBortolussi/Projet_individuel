@@ -1,0 +1,61 @@
+{% load bootstrap4 %}
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+    <meta charset="UTF-8">
+    <title>{% block title %}Title{% endblock %}</title>
+</head>
+<body style="margin: 1%">
+    <div class="jumbotron text-left">
+        <h1 style="font-size:100px">Calend-me</h1>
+        <p>A cool app to plan nice stuff</p>
+        {% if user.is_authenticated %}
+        <hr color="grey">
+        <div style="display: inline">
+            Welcome {{user.username}}
+        </div>
+        <div style="display: inline;float: right">
+            <a href="{% url "deconnexion" %}">
+                <i data-toggle="tooltip" data-placement="left" title="Deconnexion" class="fas fa-sign-out-alt fa-3x" style="float: right;color: dodgerblue;"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% if user.is_authenticated %}
+    {% block to_remove_path %}
+        <div  style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
+            {% block line_path %}{% endblock %}
+        </div>
+        <br>
+    {% endblock %}
+    {% endif %}
+    {% block page %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col-sm-4">
+              <h3>Column 1</h3>
+              <p>Lorem ipsum dolor..</p>
+            </div>
+        </div>
+
+    </div>
+    {% endblock %}
+    <div style="font-size: 15px">
+        <hr size="1" color="grey">
+        2020
+    </div>
+
+</body>
+<script>
+$(document).ready(function(){
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+</html>

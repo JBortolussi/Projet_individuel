@@ -1,10 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Connexion</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %} Connexion {% endblock %}
+{% block to_remove_path %}{% endblock %}
+
+{% block page %}
+<div>
     <h1>Se connecter</h1>
 
     {% if error %}
@@ -14,11 +13,22 @@
     {% if user.is_authenticated %}
     Vous êtes connecté, {{ user.username }} !
     {% else %}
+
+
     <form method="post" action={% url "connexion" %}>
         {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Se connecter" />
+        <div class="form-group">
+            {{form.username.errors}}
+            <label for="username">Nom de compte:</label>
+            <input type="text" class="form-control" placeholder="Enter nomde compte" id="username" name="username" value={{form.username.value}}>
+        </div>
+        <div class="form-group">
+            {{form.password.errors}}
+            <label for="pwd">Password:</label>
+            <input type="password" class="form-control" placeholder="Enter mot de passe" id="pwd" name = "password">
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
     {% endif %}
-</body>
-</html>
+</div>
+{% endblock %}

@@ -20,7 +20,7 @@ class ProjetAdmin(admin.ModelAdmin):
 
 class Projet(models.Model):
     name = models.CharField(max_length=100)
-    members = models.ManyToManyField(User, related_name='projets', null=True)
+    members = models.ManyToManyField(User, related_name='projets')
 
     def __str__(self):
         return self.name
@@ -88,25 +88,24 @@ def update_tasks_assignment(sender, **kwargs):
 @receiver(m2m_changed, sender=Projet.members.through)
 def creat_project_group(sender, **kwargs):
     project_name = kwargs['instance'].name
-    if not Permission.objects.filter(codename='{}_project_permission'.format(project_name)):
+    project_id = kwargs['instance'].id
+    if not Permission.objects.filter(codename='{}_project_permission'.format(project_id)):
         content_type = ContentType.objects.get_for_model(Projet)
         permission = Permission.objects.create(
-            codename='{}_project_permission'.format(project_name),
-            name='can see and contribute to the project {}"'.format(project_name),
+            codename='{}_project_permission'.format(project_id),
+            name='can see and contribute to the project {}({})"'.format(project_name, project_id),
             content_type=content_type,
         )
         permission.save()
-
-        group = Group(name="{}_project_group".format(project_name))
+        # TODO ajouter ici les autres permissions, trouver un moyen plus propre de le faire
+        group = Group(name="{}_project_group".format(project_id))
         group.save()
         group.permissions.add(permission)
-
-        print("{} will be added in {}".format(kwargs['instance'].members.all(), project_name))
         for member in kwargs['instance'].members.all():
             member.groups.add(group)
             member.save()
     else:
-        group = Group.objects.get(name="{}_project_group".format(project_name))
+        group = Group.objects.get(name="{}_project_group".format(project_id))
         old_member = group.user_set.all()
         curent_member = kwargs['instance'].members.all()
         new_member = curent_member.exclude(id__in=old_member)
@@ -122,8 +121,10 @@ def creat_project_group(sender, **kwargs):
 @receiver(pre_delete, sender=Projet)
 def delete_related_group_and_permissions(sender, **kwargs):
     project_name = kwargs['instance'].name
-    group = Group.objects.get(name="{}_project_group".format(project_name))
-    permission = group.permissions.get(codename='{}_project_permission'.format(project_name))
+    project_id = kwargs['instance'].id
+    group = Group.objects.get(name="{}_project_group".format(project_id))
+    # TODO si il ya plusieur permission, mettre une boucle
+    permission = group.permissions.get(codename='{}_project_permission'.format(project_id))
 
     for member in group.user_set.all():
         member.groups.remove(group)

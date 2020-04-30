@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %} Nouveau Projet {% endblock %}
+{% block line_path %}
+    <a class="custom_link" href="{% url "projects" %}"> Projets </a>
+    /
+    {% if is_new %}
+        <a class="custom_link" href="{% url "new_project" %}"> Nouveau Projet </a>
+    {% else %}
+        <a class="custom_link" href="{% url "edit_project" project.id %}" >Editer : {{project.name}}</a>
+    {% endif %}
+
+{% endblock %}
+
+{% block page %}
+<br>
+<h1 style="display: inline">Nouveau Projet</h1>
+<a class="custom_link" href="{% url "projects" %}">
+    <i data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fas fa-backspace fa-3x" style="float: right;color: tomato;"></i>
+</a>
+
+<div class="container-fluid" style="margin-top: 1%">
+    {% if is_new %}
+        <form method="post" action={% url "new_project" %}>
+    {% else %}
+        <form method="post" action={% url "edit_project" project.id %}>
+    {% endif %}
+        {% csrf_token %}
+        <div class="form-group">
+            {{form.name.errors}}
+            <label for="name"> Nom du projet:</label>
+            <input type="text" class="form-control" placeholder="Nom du projet" id="name" name="name" value="{{form.name.value}}">
+        </div>
+        <div class="form-group">
+            {{form.members.errors}}
+            <label for="members">Membres du furur projet:</label>
+            <select multiple class="form-control" id="members" name="members">
+                {% for user in users %}
+                <option value="{{user.id}}">{{user}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+</div>
+{% endblock %}
