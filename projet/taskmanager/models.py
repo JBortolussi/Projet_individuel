@@ -59,12 +59,12 @@ class TaskAdmin(admin.ModelAdmin):
 
 
 class Task(models.Model):
-    name = models.CharField(max_length=100)
-    projet = models.ForeignKey("Projet", on_delete=models.CASCADE)
-    description = models.TextField(default="Pas de description")
+    name = models.CharField(max_length=100, verbose_name="Nom")
+    projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True, blank=True)
+    description = models.TextField()
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    start_date = models.DateField()
-    due_date = models.DateField()
+    start_date = models.DateField(verbose_name="Date de début")
+    due_date = models.DateField(verbose_name="Date de fin")
     priority = models.IntegerField()
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
 
@@ -72,6 +72,8 @@ class Task(models.Model):
         return self.name
 
     def clean(self):
+        if self.projet==None:
+            return
         if self.assignee not in self.projet.members.all():
             raise ValidationError("Il faut que la perssonne à qui on assigne la tâche soit membre du projet")
 

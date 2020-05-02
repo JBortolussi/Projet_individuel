@@ -1,12 +1,12 @@
 from django.contrib.auth.models import User
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
-from .forms import ConnexionForm, ProjectForm, JournalForm
+from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-from .models import Projet, Task, Journal
+from .models import Projet, Task, Journal, Status
 
 
 def connexion(request):
@@ -115,3 +115,22 @@ def task_view(request, task_id):
             return render(request, "task.html", locals())
     else:
         return redirect("project", id=project.id)
+
+
+@login_required()
+def newtask_view(request, project_id):
+    project = get_object_or_404(Projet,id=project_id)
+    members = project.members.all()
+    status = Status.objects.all()
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        if request.method == "POST":
+            form = TaskForm(project, request.POST)
+            print(request.POST['start_date'])
+            if form.is_valid():
+                task = form.save(commit=False)
+                task.projet=project
+                task.save()
+                return redirect("task", task_id=task.id)
+        else:
+            form = TaskForm(project)
+    return render(request, "newtask.html", locals())

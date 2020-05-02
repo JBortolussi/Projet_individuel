@@ -10,8 +10,8 @@
 <br>
 
 <h1 style="display: inline">{{project.name}}</h1>
-<a class="custom_link" href="{% url "new_project" %}">
-    <i data-toggle="tooltip" data-placement="left" title="Ajouter un projet" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
+<a class="custom_link" href="{% url "newtask" project.id%}">
+    <i data-toggle="tooltip" data-placement="left" title="Ajouter une tache" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
 </a>
 
 
