@@ -56,13 +56,14 @@ class TaskForm(forms.ModelForm):
         self.fields['status'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].initial = 1
+        self.fields['projet'].widget.attrs.update({'style': 'display: none'})
         if Status.objects.filter(name="Nouvelle"):
             self.fields['status'].initial = Status.objects.filter(name="Nouvelle")[0]
 
     class Meta:
         model = Task
-        exclude = ('projet',)
+        exclude = ('',)
         widgets = {
-            'start_date': DateInput(attrs={'type': 'date'}),
-            'due_date': DateInput(attrs={'type': 'date'})
+            'start_date': DateInput(format=('%Y-%m-%d'), attrs={'type': 'date'}),
+            'due_date': DateInput(format=('%Y-%m-%d'), attrs={'type': 'date'})
         }

@@ -12,8 +12,8 @@
 <br>
 
 <h1 style="display: inline">{{project.name}}</h1>
-<a class="custom_link" href="{% url "project" project.id%}">
-    <i data-toggle="tooltip" data-placement="left" title="Retour au projet" class="fas fa-backspace fa-3x" style="float: right;color: tomato;"></i>
+<a class="custom_link" href="{% url "edittask" task.id%}">
+    <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x" style="float: right;color: dodgerblue;"></i>
 </a>
 <h3>{{task.name}}</h3>
 

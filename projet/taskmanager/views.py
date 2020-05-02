@@ -91,7 +91,7 @@ def edit_project_view(request, id):
 def project_view(request, id):
     project = get_object_or_404(Projet, id=id)
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-        tasks = Task.objects.filter(projet__id__exact=project.id)
+        tasks = Task.objects.filter(projet__id__exact=project.id).order_by('-priority')
         return render(request, 'project.html', locals())
     else:
         return redirect("projects")
@@ -119,6 +119,7 @@ def task_view(request, task_id):
 
 @login_required()
 def newtask_view(request, project_id):
+    is_new = True
     project = get_object_or_404(Projet,id=project_id)
     members = project.members.all()
     status = Status.objects.all()
@@ -127,10 +128,26 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             print(request.POST['start_date'])
             if form.is_valid():
-                task = form.save(commit=False)
-                task.projet=project
-                task.save()
+                task = form.save(commit=True)
                 return redirect("task", task_id=task.id)
         else:
             form = TaskForm(project)
+    return render(request, "newtask.html", locals())
+
+@login_required()
+def edittask_view(request, task_id):
+    is_new = False
+    task = get_object_or_404(Task, id=task_id)
+    project = task.projet
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        if request.method == "POST":
+            form = TaskForm(project, request.POST)
+            print(request.POST['start_date'])
+            if form.is_valid():
+                task = form.save(commit=False)
+                task.id = task_id
+                task.save()
+                return redirect("task", task_id=task.id)
+        else:
+            form = TaskForm(project, instance=task)
     return render(request, "newtask.html", locals())

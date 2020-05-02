@@ -42,7 +42,13 @@
                 {% endif %}
 
                 <td>{{task.start_date}}</td>
-                <td>{{task.due_date}}</td>
+                <td>{{task.due_date}}
+                    <div style="float: right">
+                        <a class="custom_link" href="{% url "edittask" task.id %}">
+                            <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-2x" style="float: right;color: dodgerblue;"></i>
+                        </a>
+                    </div>
+                </td>
             </tr>
         {% endfor %}
     </tbody>
