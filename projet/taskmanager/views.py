@@ -52,7 +52,6 @@ def newproject_view(request):
             return redirect("projects")
     else:
         form = ProjectForm(request.user)
-        form.fields["name"] = ""
 
     return render(request, 'newProject.html', locals())
 

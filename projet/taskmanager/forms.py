@@ -19,6 +19,11 @@ class ProjectForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         self.user = user
         super().__init__(*args, **kwargs)
+        self.fields['name'].label = "Nom du projet"
+        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du projet"})
+        self.fields['members'].label = "Membres du projet"
+        self.fields['members'].widget.attrs.update({'class': 'form-control'})
+        self.fields['members'].initial = user
 
     class Meta:
         model = Projet
