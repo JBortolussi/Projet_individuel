@@ -11,6 +11,14 @@ from django.db.models import Q
 
 
 class ConnexionForm(forms.Form):
+    def __init__(self, *args, **kwargs):
+        super(ConnexionForm, self).__init__(*args, **kwargs)
+
+        self.fields['username'].label = "Nom d'utilisateur"
+        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du d'utilisateur"})
+        self.fields['password'].label = "Mot de passe"
+        self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': "Mot de passe"})
+
     username = forms.CharField(label="Nom d'utilisateur", max_length=30)
     password = forms.CharField(label="Mot de passe", widget=forms.PasswordInput)
 
@@ -18,7 +26,7 @@ class ConnexionForm(forms.Form):
 class ProjectForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         self.user = user
-        super().__init__(*args, **kwargs)
+        super(ProjectForm, self).__init__(*args, **kwargs)
         self.fields['name'].label = "Nom du projet"
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du projet"})
         self.fields['members'].label = "Membres du projet"
@@ -27,7 +35,7 @@ class ProjectForm(forms.ModelForm):
 
     class Meta:
         model = Projet
-        exclude = ('',)
+        fields = "__all__"
 
     def clean_members(self):
         members = self.cleaned_data['members']

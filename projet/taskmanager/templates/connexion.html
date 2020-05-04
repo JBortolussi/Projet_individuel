@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %} Connexion {% endblock %}
+<!--This block is use in order to remove the line with path "Projet/..."-->
 {% block to_remove_path %}{% endblock %}
 
 {% block page %}
@@ -10,25 +11,34 @@
     <p><strong>Utilisateur inconnu ou mauvais de mot de passe.</strong></p>
     {% endif %}
 
-    {% if user.is_authenticated %}
-    Vous êtes connecté, {{ user.username }} !
-    {% else %}
-
-
+    <!--connexion form with two columns-->
     <form method="post" action={% url "connexion" %}>
         {% csrf_token %}
-        <div class="form-group">
-            {{form.username.errors}}
-            <label for="username">Nom de compte:</label>
-            <input type="text" class="form-control" placeholder="Enter nomde compte" id="username" name="username" value={{form.username.value}}>
+
+        <!--display the username field-->
+        <div class="row">
+            <div class="col-sm-2">
+                {{form.username.label}}
+            </div>
+            <div class="col-sm-10">
+                <div class="form-group" style="flex-grow: 1;">
+                   {{form.username}}
+                </div>
+            </div>
         </div>
-        <div class="form-group">
-            {{form.password.errors}}
-            <label for="pwd">Password:</label>
-            <input type="password" class="form-control" placeholder="Enter mot de passe" id="pwd" name = "password">
+
+        <!--display the password field-->
+        <div class="row">
+            <div class="col-sm-2">
+                {{form.password.label}}
+            </div>
+            <div class="col-sm-10">
+                <div class="form-group" style="flex-grow: 1;">
+                   {{form.password}}
+                </div>
+            </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Connection</button>
     </form>
-    {% endif %}
 </div>
 {% endblock %}
