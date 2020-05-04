@@ -28,11 +28,13 @@ def connexion(request):
 
     # Someone try to connected and had sent a form
     if request.method == "POST":
+
         # retrieve the user's data
         form = ConnexionForm(request.POST)
         if form.is_valid():
             username = form.cleaned_data["username"]
             password = form.cleaned_data["password"]
+
             # Test if the user can be log in
             user = authenticate(username=username, password=password)
             # Success
@@ -62,7 +64,7 @@ def deconnexion(request):
 
 @login_required()
 def projects_view(request):
-    """The for the display project list page"""
+    """The for the project list display page"""
 
     # The projects to be displayed. Only ones in witch the logged in user is involved
     projects = request.user.projets.all()
@@ -74,20 +76,30 @@ def newproject_view(request):
     """View for the newProject page
 
     This view handel the treatment of the newproject form
-    
+    Creat a new project based on the form's data. The logged in user will always be part of the project
 
-    :param request:
-    :return:
+    :param request: The request data. An user need to be logged in order to creat a project
+    :return: The HttpResponse for the new project templates or redirect to the project list page if a project have been
+    created
     """
 
+    # Use to tell to the template that the user want to creat a new project
     is_new = True
+
+    # Get all the user. Everyone may be member of the project
     users = User.objects.all()
+
+    # If the view received data, try to creat a project
     if request.method == "POST":
         form = ProjectForm(request.user, request.POST)
         if form.is_valid():
+            # Save the new project in the database
             form.save(commit=True)
+
+            # redirect to the project list display page
             return redirect("projects")
     else:
+        # creat an empty form for the template
         form = ProjectForm(request.user)
 
     return render(request, 'newProject.html', locals())

@@ -19,6 +19,10 @@ class ProjetAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
 
+    # Ensure that the prject has at least one member
+    def clean(self):
+        if not self.members:
+            raise ValidationError("Un projet doit avoir au moins un membre")
 
 class Projet(models.Model):
     name = models.CharField(max_length=100)
