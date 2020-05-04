@@ -15,11 +15,14 @@
     <div class="jumbotron text-left">
         <h1 style="font-size:100px">Calend-me</h1>
         <p>A cool app to plan nice stuff</p>
+
+        <!--If the user is logged in, say welcome and offer him to log out-->
         {% if user.is_authenticated %}
         <hr color="grey">
         <div style="display: inline">
             Welcome {{user.username}}
         </div>
+        <!--log out button-->
         <div style="display: inline;float: right">
             <a href="{% url "deconnexion" %}">
                 <i data-toggle="tooltip" data-placement="left" title="Deconnexion" class="fas fa-sign-out-alt fa-3x" style="float: right;color: dodgerblue;"></i>
@@ -28,6 +31,7 @@
         {% endif %}
     </div>
     {% if user.is_authenticated %}
+    <!--Allow following templates to delete this line-->
     {% block to_remove_path %}
         <div  style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
             {% block line_path %}{% endblock %}
@@ -35,28 +39,24 @@
         <br>
     {% endblock %}
     {% endif %}
-    {% block page %}
-    <div class="container">
 
-        <div class="row">
-            <div class="col-sm-4">
-              <h3>Column 1</h3>
-              <p>Lorem ipsum dolor..</p>
-            </div>
-        </div>
-
-    </div>
-    {% endblock %}
+    <!--Main block of the page-->
+    {% block page %} Nothing to be displayed {% endblock %}
     <div style="font-size: 15px">
         <hr size="1" color="grey">
         2020
     </div>
 
 </body>
+
+
 <script>
+// script that allow bootstratp tooltip to work properly
 $(document).ready(function(){
   $('[data-toggle="tooltip"]').tooltip();
 });
+// Allow following templates to have their own scripts.
+// Be aware that the script tags are no more required in this block.
 {% block scriptBase %}{% endblock %}
 </script>
 </html>

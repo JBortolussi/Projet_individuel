@@ -10,7 +10,7 @@ from .models import Projet, Task, Journal, Status
 
 
 def connexion(request):
-    """view for the connexion page
+    """View for the connexion page
 
     This view handel the treatment the the connexion form.
     If the log in process is successful, redirect the user to the project list page
@@ -62,12 +62,24 @@ def deconnexion(request):
 
 @login_required()
 def projects_view(request):
+    """The for the display project list page"""
+
+    # The projects to be displayed. Only ones in witch the logged in user is involved
     projects = request.user.projets.all()
     return render(request, 'projects.html', locals())
 
 
 @login_required()
 def newproject_view(request):
+    """View for the newProject page
+
+    This view handel the treatment of the newproject form
+    
+
+    :param request:
+    :return:
+    """
+
     is_new = True
     users = User.objects.all()
     if request.method == "POST":
