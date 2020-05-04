@@ -92,6 +92,7 @@ class TaskForm(forms.ModelForm):
         self.fields['priority'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].initial = 1
         self.fields['projet'].widget.attrs.update({'style': 'display: none'})
+        self.fields['projet'].initial = project
         if Status.objects.filter(name="Nouvelle"):
             self.fields['status'].initial = Status.objects.filter(name="Nouvelle")[0]
 

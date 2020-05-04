@@ -107,39 +107,88 @@ def newproject_view(request):
 
 @login_required()
 def delete_project_view(request, id):
+    """The project deletion view
+
+    This view handle the deletion of a project. Check if the logged in user is allowed to delete the project
+
+    :param request:
+    :param id: The id of the project to be deleted
+    :return: Allays redirect to the project list display page
+    """
+
+    # retrieve the project to be deleted through his id. Raise an error if the project does not exist
     project = get_object_or_404(Projet, id=id)
+
+    # Check if the logged in user is allowed to delete this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+
+        # Eventually delete the project
         project.delete()
 
     return redirect("projects")
 
 
 @login_required()
-def edit_project_view(request, id):
+def edit_project_view(request, project_id):
+    """The project creation view
+
+    This view handel the project edition form. Check if the logged in user is allowed to edit this project
+
+    :param request:
+    :param project_id: The id of the project to edited
+    :return: Either HttpResponse for the edition template (same as creation) or redirect to project list display page if
+     the project has been successfully edited
+    """
+
+    # Use to tell to the template that the user want to edit a project
     is_new = False
-    project = get_object_or_404(Projet, id=id)
+
+    # Retrieve the project to be edited or raise an error if this project does not exist
+    project = get_object_or_404(Projet, id=project_id)
+
+    # Check if the logged in user is allowed to edit this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-        users = User.objects.all()
+
+        # Check if the view receive data from the form
         if request.method == "POST":
             form = ProjectForm(request.user, request.POST)
             if form.is_valid():
+                # Manually update the field using the data from form
                 project.name = form.cleaned_data["name"]
                 project.members.set(form.cleaned_data["members"])
+                # Save the project. Does not creat a new project as long as the project's id is not modified
                 project.save()
                 return redirect("projects")
         else:
             form = ProjectForm(user=request.user, instance=project)
 
+        # Get all the users. Everyone may become a member of the project
+        users = User.objects.all()
         return render(request, 'newProject.html', locals())
 
     return redirect("projects")
 
 
 @login_required()
-def project_view(request, id):
-    project = get_object_or_404(Projet, id=id)
+def project_view(request, project_id):
+    """The project display view
+
+    This view handel the template witch display the projects details.
+
+    :param request:
+    :param project_id: The id of the project to be displayed
+    :return: Either a HttpResponse for the project template or redirect to the project list page if the user is not
+    allowed to see this project
+    """
+
+    # Retrieve the project to to be displayed. Raise an error if this project does not exist
+    project = get_object_or_404(Projet, id=project_id)
+
+    # Check if the logged in user is allowed to see this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-        tasks = Task.objects.filter(projet__id__exact=project.id).order_by('-priority')
+
+        # Retrieve all the task of the project and order them
+        tasks = project.task_set.all().order_by('-priority')
         return render(request, 'project.html', locals())
     else:
         return redirect("projects")
@@ -175,7 +224,6 @@ def newtask_view(request, project_id):
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
         if request.method == "POST":
             form = TaskForm(project, request.POST)
-            print(request.POST['start_date'])
             if form.is_valid():
                 task = form.save(commit=True)
                 return redirect("task", task_id=task.id)

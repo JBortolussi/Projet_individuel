@@ -24,6 +24,7 @@ class ProjetAdmin(admin.ModelAdmin):
         if not self.members:
             raise ValidationError("Un projet doit avoir au moins un membre")
 
+
 class Projet(models.Model):
     name = models.CharField(max_length=100)
     members = models.ManyToManyField(User, related_name='projets')
@@ -76,7 +77,7 @@ class Task(models.Model):
         return self.name
 
     def clean(self):
-        if self.projet==None:
+        if self.projet == None:
             return
         if self.assignee not in self.projet.members.all():
             raise ValidationError("Il faut que la perssonne à qui on assigne la tâche soit membre du projet")
