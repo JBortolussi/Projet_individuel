@@ -267,18 +267,33 @@ def newtask_view(request, project_id):
 
 @login_required()
 def edittask_view(request, task_id):
+    """The edit task page view
+
+    Handel the edit task page and form. Check if the logged in user is allowed to modify this task.
+
+    :param request:
+    :param task_id: The task to be modified
+    :return:
+    """
+
+    # Use to tell to the template tha the user want to edit an already existing task
     is_new = False
+
+    # Retrieve the task, raise an error if the task does not exist
     task = get_object_or_404(Task, id=task_id)
     project = task.projet
+    # Check if logged in user is allowed to modify the task
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        # Check if the form has been submitted
         if request.method == "POST":
             form = TaskForm(project, request.POST)
-            print(request.POST['start_date'])
             if form.is_valid():
                 task = form.save(commit=False)
+                # Manually set the project id. Otherwise a new task would be created
                 task.id = task_id
                 task.save()
                 return redirect("task", task_id=task.id)
         else:
+            # Initialize the form with the task
             form = TaskForm(project, instance=task)
     return render(request, "newtask.html", locals())

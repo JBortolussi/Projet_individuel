@@ -74,29 +74,37 @@ class JournalForm(forms.ModelForm):
 
     class Meta:
         model = Journal
-        
+
         # Exclude all the fields except the entry. They will be set up using the local value in the corresponding view
         exclude = ('task', 'date', 'author')
 
 
 class TaskForm(forms.ModelForm):
     def __init__(self, project, *args, **kwargs):
+        # Use to limit the possible choice for the assignee field to members of the project
         assignee_choices = [(member.id, member.username) for member in project.members.all()]
         super(TaskForm, self).__init__(*args, **kwargs)
+
+        # Set the style properties
         self.fields['assignee'].label = "Assignée à :"
         self.fields['assignee'].widget.attrs.update({'class': 'form-control'})
+        # Actually limit the choices for the assignee field
         self.fields['assignee'].choices = assignee_choices
         self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nom de la tâche'})
         self.fields['description'].widget.attrs.update(
             {'class': 'form-control', 'placeholder': 'Description de la tache', 'rows': 4})
         self.fields['start_date'].widget.attrs.update({'class': 'form-control', })
+        # Initialize the start_date field with the current date
         self.fields['start_date'].initial = datetime.now().strftime("%Y-%m-%d")
         self.fields['due_date'].widget.attrs.update({'class': 'form-control'})
         self.fields['status'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].initial = 1
+        # This field is only used in order to set up the project field with the project.
+        # Shall not be modified by the user
         self.fields['projet'].widget.attrs.update({'style': 'display: none'})
         self.fields['projet'].initial = project
+        # If a "new" status has be defined then initialize the status field with it
         if Status.objects.filter(name="Nouvelle"):
             self.fields['status'].initial = Status.objects.filter(name="Nouvelle")[0]
 
