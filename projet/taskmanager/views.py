@@ -161,9 +161,6 @@ def edit_project_view(request, project_id):
                 return redirect("projects")
         else:
             form = ProjectForm(user=request.user, instance=project)
-
-        # Get all the users. Everyone may become a member of the project
-        users = User.objects.all()
         return render(request, 'newProject.html', locals())
 
     return redirect("projects")
@@ -237,17 +234,33 @@ def task_view(request, task_id):
 
 @login_required()
 def newtask_view(request, project_id):
+    """The new task page view
+
+    This view handel the task creation template and form.
+    Check if the logged in user is allowed to add a task to the project
+
+    :param request:
+    :param project_id: The project to which the task will be linked
+    :return: Either task page if a task have been created or the creation task page if not
+    """
+    # Use to tell to the template that user want to creat a new task
     is_new = True
+
+    # Retrieve the task, raise an error if the task does not exist
     project = get_object_or_404(Projet, id=project_id)
-    members = project.members.all()
-    status = Status.objects.all()
+
+    # Check if the user is allowed to add a task to this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+
+        # Check if a form has been submitted
         if request.method == "POST":
+            # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
                 return redirect("task", task_id=task.id)
         else:
+            # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
             form = TaskForm(project)
     return render(request, "newtask.html", locals())
 
