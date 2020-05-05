@@ -24,7 +24,7 @@ def connexion(request):
 
     # No need to use connexion method if already logged in
     if request.user.is_authenticated:
-        return redirect("project")
+        return redirect("projects")
 
     # Someone try to connected and had sent a form
     if request.method == "POST":
