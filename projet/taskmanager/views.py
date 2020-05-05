@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 
 # Create your views here.
-from .models import Projet, Task, Journal, Status
+from .models import Projet, Task, Journal
 
 
 def connexion(request):

@@ -1,16 +1,13 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django import forms
 from django.contrib import admin
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
-from django.db.models.signals import pre_save, m2m_changed, pre_delete
+from django.db.models.signals import  m2m_changed, pre_delete
 from django.utils import timezone
 
 # Create your models here.
-from projet import settings
-
 
 class ProjetAdmin(admin.ModelAdmin):
     # configuration vue projet dans Admin
@@ -110,9 +107,17 @@ class JournalAdmin(admin.ModelAdmin):
 
 @receiver(m2m_changed, sender=Projet.members.through)
 def update_tasks_assignment(sender, **kwargs):
-    project_tasks = Task.objects.filter(projet=kwargs['instance'])
+    """
+    This function is called whenever the project members field of a project is modified.
+    His scope is to make sure that a task is not assign to someone who is no more member of the project
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+    project_tasks = kwargs['instance'].task_set.all()
     project_members = kwargs['instance'].members.all()
-    # on recupère la liste des gens qui n'on rien à faire là
+    # Retrieve the tasks with an forbidden assignment
     wrong_assignee_task = project_tasks.exclude(assignee__in=project_members)
     for task in wrong_assignee_task:
         task.assignee = None
@@ -121,9 +126,22 @@ def update_tasks_assignment(sender, **kwargs):
 
 @receiver(m2m_changed, sender=Projet.members.through)
 def creat_project_group(sender, **kwargs):
+    """Function which manage permissions
+
+    This function is called whenever the member field of a project is modified.
+    His scope is to make sure that newcomers get the permissions and leaving people left their permission
+    Alose creat the permission when the project is created
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
+
     project_name = kwargs['instance'].name
     project_id = kwargs['instance'].id
+    # Check if a permission exist/if it is a new project
     if not Permission.objects.filter(codename='{}_project_permission'.format(project_id)):
+        # permission creation procedure
         content_type = ContentType.objects.get_for_model(Projet)
         permission = Permission.objects.create(
             codename='{}_project_permission'.format(project_id),
@@ -131,17 +149,24 @@ def creat_project_group(sender, **kwargs):
             content_type=content_type,
         )
         permission.save()
-        # TODO ajouter ici les autres permissions, trouver un moyen plus propre de le faire
+        # TODO ajouter ici les autres permissions
+
+        # Creat a group of permission for each project. New permissions for project members can be add through it
         group = Group(name="{}_project_group".format(project_id))
         group.save()
+
+        # Add permissions to the group
         group.permissions.add(permission)
         for member in kwargs['instance'].members.all():
             member.groups.add(group)
             member.save()
     else:
+        # It is not a new project so the permissions may need an update
+        # Retrieve the project's group
         group = Group.objects.get(name="{}_project_group".format(project_id))
         old_member = group.user_set.all()
         curent_member = kwargs['instance'].members.all()
+        # Compute the newcomers list and and the leaving people list
         new_member = curent_member.exclude(id__in=old_member)
         member_to_be_remove = old_member.exclude(id__in=curent_member)
         for member in new_member:
@@ -154,12 +179,18 @@ def creat_project_group(sender, **kwargs):
 
 @receiver(pre_delete, sender=Projet)
 def delete_related_group_and_permissions(sender, **kwargs):
-    project_name = kwargs['instance'].name
+    """This function delete the group and the permissions specific to the project
+
+    :param sender:
+    :param kwargs:
+    :return:
+    """
     project_id = kwargs['instance'].id
     group = Group.objects.get(name="{}_project_group".format(project_id))
-    # TODO si il ya plusieur permission, mettre une boucle
+    # TODO suprimer les permissions qu'on ajoute
     permission = group.permissions.get(codename='{}_project_permission'.format(project_id))
 
+    # Remove permission to all members
     for member in group.user_set.all():
         member.groups.remove(group)
         member.save()

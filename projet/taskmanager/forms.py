@@ -1,14 +1,11 @@
 from datetime import datetime
-from itertools import chain
 
 from django import forms
-from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.db.models import QuerySet
 from django.forms import DateInput
 
 from .models import Projet, Journal, Task, Status
-from django.db.models import Q
+
 
 
 class ConnexionForm(forms.Form):
