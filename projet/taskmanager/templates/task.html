@@ -12,6 +12,7 @@
 <br>
 
 <h1 style="display: inline">{{project.name}}</h1>
+{# Display the edit button #}
 <a class="custom_link" href="{% url "edittask" task.id%}">
     <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x" style="float: right;color: dodgerblue;"></i>
 </a>
@@ -49,6 +50,7 @@
     </tbody>
 </table>
 <h6>History</h6>
+{# Display all the entries #}
 <table class="table">
     <tbody>
     {% for entry in entries %}
@@ -68,12 +70,18 @@
     {% endfor %}
     </tbody>
 </table>
+    {# Journal form section #}
+    {# To be active mean to be hidden #}
+    {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
     <i  id="CA" data-toggle="tooltip" data-placement="left" title="Ajouter une information" class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
-    <div id="db" class="row active">
+    {# CB is initially hidden. Will be displayed when the first button will clicked #}
+    <div id="CB" class="row active">
         <div class="col-sm-1">
-            <i id="CB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x" style="display: inline;color: tomato;"></i>
+            {# The second button. When clicked it will be hidden and the first button will be displayed again #}
+            <i id="IB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x" style="display: inline;color: tomato;"></i>
         </div>
         <div class="col-sm-11">
+            {# The Journal form #}
             <form method="post" action="{% url "task" task.id %}">
                 {% csrf_token %}
                 <div class="row">
@@ -90,24 +98,26 @@
         </div>
     </div>
 </div>
+
+{# This code implement the buttons which display/hide the journal form #}
 {% endblock %}
 {% block scriptBase %}
 <!--<script>-->
     let CA=document.getElementById("CA");
+    let IB=document.getElementById("IB");
     let CB=document.getElementById("CB");
-    let DB=document.getElementById("db");
 
     function toggA(){
-        DB.classList.toggle("active");
+        CB.classList.toggle("active");
         CA.classList.toggle("active");
     };
     CA.onclick=toggA;
 
     function toggB(){
         CA.classList.toggle("active");
-        DB.classList.toggle("active");
+        CB.classList.toggle("active");
     };
-    CB.onclick=toggB;
+    IB.onclick=toggB;
 
 <!--//</script>-->
 

@@ -196,23 +196,43 @@ def project_view(request, project_id):
 
 @login_required()
 def task_view(request, task_id):
+    """The task page view
+
+    This page display task's details such as his name and his status.
+    It also display all the journal entries linked with this project
+    and handel the Journal Form. So that can user can add a new entry to the project's journal
+
+    :param request:
+    :param task_id: The id of the task to be displayed
+    :return: Always render the task page, except when the user logged in is not allowed to see this task
+    """
+
+    # retrieve the task, raise an error if the task does not exist
     task = get_object_or_404(Task, id=task_id)
     project = task.projet
+    # Check if the logged in user is allowed to see this task
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-        entries = Journal.objects.filter(task__id=task_id)
-        if (request.method == "POST"):
+        # Check if a form has been submitted
+        if request.method == "POST":
+
+            # Build the form and verify it
             form = JournalForm(request.POST)
-            if (form.is_valid()):
-                journal = form.save(commit=False)
+            if form.is_valid():
+
+                # Save the Journal and set the project and author fields
+                journal = form.save(commit=False)  # Does not save the Journal in the database
                 journal.task = task
                 journal.author = request.user
                 journal.save()
         else:
-
+            # initialize a new form
             form = JournalForm()
+        # Get the Journal entries linked with the task
+        entries = Journal.objects.filter(task__id=task_id)
         return render(request, "task.html", locals())
     else:
-        return redirect("project", id=project.id)
+        # redirect to the linked project to the project list page if the user is not allowed to see the task
+        return redirect("projects")
 
 
 @login_required()

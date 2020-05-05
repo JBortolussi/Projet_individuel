@@ -68,10 +68,14 @@ class JournalForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(JournalForm, self).__init__(*args, **kwargs)
+
+        # Set the style properties
         self.fields['entry'].widget.attrs.update({'class': 'form-control'})
 
     class Meta:
         model = Journal
+        
+        # Exclude all the fields except the entry. They will be set up using the local value in the corresponding view
         exclude = ('task', 'date', 'author')
 
 
