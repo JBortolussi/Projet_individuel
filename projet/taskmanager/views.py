@@ -4,8 +4,6 @@ from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-
-# Create your views here.
 from .models import Projet, Task, Journal
 
 
@@ -60,6 +58,11 @@ def deconnexion(request):
     """
     logout(request)
     return HttpResponseRedirect(reverse(connexion))
+
+
+@login_required()
+def redir(request):
+    return redirect('projects')
 
 
 @login_required()

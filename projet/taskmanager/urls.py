@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.redir, name="redirect"),
     path('connexion/', views.connexion, name="connexion"),
     path('deconnexion/', views.deconnexion, name="deconnexion"),
     path('projects/', views.projects_view, name="projects"),
