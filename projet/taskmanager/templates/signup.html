@@ -1,0 +1,12 @@
+{%  extends base.html %}
+{% block title %} Sign Up {% endblock %}
+
+{% block page %}
+<div class="container-fluid" style="margin-top: 1%">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Sign up</button>
+    </form>
+</div>
+{% endblock %}

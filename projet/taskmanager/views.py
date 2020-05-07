@@ -1,3 +1,4 @@
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
@@ -300,3 +301,22 @@ def edittask_view(request, task_id):
             # Initialize the form with the task
             form = TaskForm(project, instance=task)
     return render(request, "newtask.html", locals())
+
+# Sign up page is the only view which doesn't require a log in for obvious reasons
+def signup(request):
+    if request.method == 'POST':
+
+        # Form is a existing template imported from the library django.contrib.auth.forms
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+
+            # Automatically log in the user once they have signed up and redirect them to the home screen
+            login(request, user)
+            return redirect('projects')
+    else:
+        form = UserCreationForm()
+    return render(request, 'taskmanager/signup.html', locals())
