@@ -319,4 +319,4 @@ def signup(request):
             return redirect('projects')
     else:
         form = UserCreationForm()
-    return render(request, 'taskmanager/signup.html', locals())
+    return render(request, 'signup.html', locals())
