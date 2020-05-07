@@ -5,6 +5,7 @@ urlpatterns = [
     path('', views.redir, name="redirect"),
     path('connexion/', views.connexion, name="connexion"),
     path('deconnexion/', views.deconnexion, name="deconnexion"),
+    path('signup/', views.signup, name="signup"),
     path('projects/', views.projects_view, name="projects"),
     path('projects/newproject', views.newproject_view, name="new_project"),
     path('projects/delete/<int:id>', views.delete_project_view, name="delete_project"),
