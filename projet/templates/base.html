@@ -29,15 +29,16 @@
         <a class="navbar-brand" href="#">Welcome {{ user.first_name|default:user.username }} !</a>
         {# If the user is logged in, show all nav bar #}
 
-        {% if user.is_authenticated %}
-            {# Responsive behavior: show button on little devices #}
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
-                    aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
 
-            <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ml-auto">
+        {# Responsive behavior: show button on little devices #}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'projects' %}">Home
                             <span class="sr-only">(current)</span>
@@ -48,15 +49,17 @@
                     </li>
                     {# Logout button #}
                     <li class="nav-item">
-                        <a href="{% url "deconnexion" %}" class="btn btn-danger d-none d-inline-block ml-md-2">
+                        <a href="{% url "logout" %}" class="btn btn-danger d-none d-inline-block ml-md-2">
                             <i class="fa fa-sign-out-alt align-middle" aria-hidden="true"></i>
                             <span class="align-middle">Logout</span>
                         </a>
                     </li>
-                </ul>
-            </div>
-            </div>
-        {% endif %}
+                {% else %}
+                    {% block nav_button %}{% endblock %}
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 </nav>
 
 {# PAGE CONTENT #}
@@ -70,6 +73,17 @@
         </a>
         <h5>A rapid and easy tool to manage your projects</h5>
     </header>
+
+    {# ALERTS MESSAGES #}
+    {% if messages %}
+        {% for message in messages %}
+            {# alert if sign up successfully: only one implemented #}
+            <div class="alert alert-success alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
 
     {# BLOCK NAVIGATION #}
     {# to be updated #}
