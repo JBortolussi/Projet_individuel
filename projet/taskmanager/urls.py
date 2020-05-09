@@ -14,4 +14,5 @@ urlpatterns = [
     path('task/<int:task_id>', views.task_view, name="task"),
     path('newtask/<project_id>', views.newtask_view, name="newtask"),
     path('edittask/<task_id>', views.edittask_view, name="edittask"),
+    path('download', views.export_data, name="export_data")
 ]

@@ -1,11 +1,16 @@
+import csv
+from time import strftime
+
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import Projet, Task, Journal
+from datetime import datetime
 
 
 def connexion(request):
@@ -125,7 +130,6 @@ def delete_project_view(request, id):
 
     # Check if the logged in user is allowed to delete this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
-
         # Eventually delete the project
         project.delete()
 
@@ -219,7 +223,6 @@ def task_view(request, task_id):
             # Build the form and verify it
             form = JournalForm(request.POST)
             if form.is_valid():
-
                 # Save the Journal and set the project and author fields
                 journal = form.save(commit=False)  # Does not save the Journal in the database
                 journal.task = task
@@ -302,6 +305,7 @@ def edittask_view(request, task_id):
             form = TaskForm(project, instance=task)
     return render(request, "newtask.html", locals())
 
+
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):
     if request.method == 'POST':
@@ -320,3 +324,51 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', locals())
+
+
+def export_data(request):
+    # MIME type of the response
+    response = HttpResponse(content_type='text/csv')
+    # to tell the browser to treat the response as a file attachment
+    response['Content-Disposition'] = 'attachment; filename="projects.csv"'
+    # create csv object writer
+    writer = csv.writer(response, delimiter=';')
+
+    # write user data
+    user = request.user
+    writer.writerow(['USER DATA'])
+    writer.writerow(['Username', user.username])
+    writer.writerow(['Name', user.first_name])
+    writer.writerow(['Surname', user.last_name])
+    writer.writerow(['E-mail', user.email])
+    writer.writerow([''])
+
+    writer.writerow(['PROJECTS LIST'])
+    writer.writerow(['Name', 'Members', 'Tasks'])
+    for project in user.projets.all():
+        # write projects
+        members = ', '.join([member.username for member in project.members.all()])
+        tasks = ', '.join([task.name for task in project.task_set.all()])
+        writer.writerow([project.name, members, tasks ])
+    writer.writerow([''])
+
+    # write tasks
+    writer.writerow(['TASKS LIST (ordered by project)'])
+    for project in user.projets.all():
+        writer.writerow([
+            'Project','Name', 'Assigned to', 'Status', 'Priority', 'Start date', 'Due date', 'Description'])
+        for task in project.task_set.all():
+            task_data = [task.projet, task.name, task.assignee, task.status, task.priority,
+                         task.start_date.strftime("%m/%d/%Y"), task.due_date.strftime("%m/%d/%Y"), task.description]
+            writer.writerow(task_data)
+    writer.writerow([''])
+
+    writer.writerow(['JOURNALS LIST (ordered by project and task)'])
+    for project in user.projets.all():
+        for task in project.task_set.all():
+            writer.writerow(['Project', 'Task', 'Date', 'Author', 'Entry'])
+            for journal in task.journal_set.all():
+                journal_data = [project, task, journal.date.strftime("%m/%d/%Y, %H:%M:%S"), journal.entry]
+                writer.writerow(journal_data)
+
+    return response
