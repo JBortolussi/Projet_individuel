@@ -356,12 +356,22 @@ def taches_assignees(request):
 
     return render(request, "tachesassignees.html", locals())
 
+
 @login_required()
 def taches_terminees(request):
 
     tasks = Task.objects.filter(assignee=request.user, status__name__contains="Finished")
 
     return render(request, "tachesterminees.html", locals())
+
+
+@login_required()
+def taches_projets(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "tachesprojets.html", locals())
+
 
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):

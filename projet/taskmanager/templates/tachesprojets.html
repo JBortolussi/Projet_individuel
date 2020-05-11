@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %} My Profile {% endblock %}
+{% block page %}
+    <div class="container">
+        <ul class="nav nav-tabs nav-justified">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "myprofile" %}">Vos projets</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "taches_assignees" %}">Tâches assignés</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url "taches_terminees" %}">Tâches terminées</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{% url "taches_projets" %}">Tâches par projet</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link disabled" href="#">Tâches récentes</a>
+            </li>
+        </ul>
+    <br>
+    </div>
+
+    <div class="container">
+        {% for project in projects %}
+            <h2>{{ project.name }}</h2>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned</th>
+                        <th>Start Date</th>
+                        <th>Due Date</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in project.task_set.all %}
+                        <tr>
+                            <td>{{ task.name }}</td>
+                            <td>{{ task.assignee }}</td>
+                            <td>{{ task.start_date }}</td>
+                            <td>{{ task.due_date }}</td>
+                            <td>{{ task.priority }}</td>
+                            <td>{{ task.status }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <br>
+        {% endfor %}
+    </div>
+{% endblock %}

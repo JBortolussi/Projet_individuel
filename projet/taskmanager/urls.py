@@ -17,4 +17,5 @@ urlpatterns = [
     path('myprofile/1', views.my_profile, name="myprofile"),
     path('myprofile/2', views.taches_assignees, name="taches_assignees"),
     path('myprofile/3', views.taches_terminees, name="taches_terminees"),
+    path('myprofile/4', views.taches_projets, name="taches_projets"),
 ]
