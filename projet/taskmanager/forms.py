@@ -112,3 +112,19 @@ class TaskForm(forms.ModelForm):
             'start_date': DateInput(format=('%Y-%m-%d'), attrs={'type': 'date'}),
             'due_date': DateInput(format=('%Y-%m-%d'), attrs={'type': 'date'})
         }
+
+
+class ExportDataForm(forms.Form):
+    user = forms.BooleanField(required=False)
+    projects = forms.BooleanField(required=False)
+    tasks = forms.BooleanField(required=False)
+    journals = forms.BooleanField(required=False)
+    status = forms.BooleanField(required=False)
+
+    FORMAT_FIELD_CHOICES = [
+        ('CSV', 'csv'),
+        ('JSON', 'json'),
+        ('XML', 'xml'),
+        ('XLS', 'xls (MS Excel)'),
+    ]
+    file_format = forms.ChoiceField(choices=FORMAT_FIELD_CHOICES)

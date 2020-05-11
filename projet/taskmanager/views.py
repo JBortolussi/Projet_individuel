@@ -327,7 +327,26 @@ def signup(request):
     return render(request, 'signup.html', locals())
 
 
-def export_data(request):
+@login_required()
+def data_selection(request):
+    if request.method == 'POST':
+        form = ExportDataForm(request.POST)
+        if form.is_valid():
+            file_format = form.cleaned_data['file_format']
+            exp_u = int(form.cleaned_data['user'])
+            exp_p = int(form.cleaned_data['projects'])
+            exp_t = int(form.cleaned_data['tasks'])
+            exp_j = int(form.cleaned_data['journals'])
+            exp_s = int(form.cleaned_data['status'])
+
+            return redirect(download_data, file_format, exp_u, exp_p, exp_t, exp_j, exp_s)
+    else:
+        form = ExportDataForm()
+    return render(request, 'data_selection.html', locals())
+
+
+@login_required()
+def download_data(request, file_format, exp_u, exp_p, exp_t, exp_j, exp_s):
     response = HttpResponse(content_type='application/zip')
     response['Content-Disposition'] = 'attachment; filename="data.zip"'
 
@@ -408,7 +427,6 @@ def export_data(request):
     data_zip.writestr('journals_data.json', output.getvalue())
     output.close()
 
-
     status_queryset = Status.objects.all()
     output = io.StringIO()
     csv_status = csv.writer(output, dialect='excel', delimiter=';')
@@ -419,14 +437,12 @@ def export_data(request):
     data_zip.writestr('status_data.csv', output.getvalue())  ## write csv file to zip
     output.close()
 
-
     output = io.StringIO()
     json_status = serializers.serialize("json", status_queryset, use_natural_foreign_keys=True,
-                                       use_natural_primary_keys=True)
+                                        use_natural_primary_keys=True)
     output.write(json_status)
     data_zip.writestr('status_data.json', output.getvalue())
     output.close()
-
 
     data_zip.close()
     return response

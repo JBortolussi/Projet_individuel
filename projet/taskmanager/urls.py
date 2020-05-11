@@ -14,5 +14,7 @@ urlpatterns = [
     path('task/<int:task_id>', views.task_view, name="task"),
     path('newtask/<project_id>', views.newtask_view, name="newtask"),
     path('edittask/<task_id>', views.edittask_view, name="edittask"),
-    path('download', views.export_data, name="export_data")
+    path('data-selection', views.data_selection, name="select-data"),
+    path('data-download/<str:file_format>/<int:exp_u>/<int:exp_p>/<int:exp_t>/<int:exp_j>/<int:exp_s>',
+         views.download_data, name="export-data"),
 ]

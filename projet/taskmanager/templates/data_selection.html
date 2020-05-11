@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block page %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Download</button>
+    </form>
+{% endblock %}
