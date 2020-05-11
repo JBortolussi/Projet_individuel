@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -259,6 +261,9 @@ def task_view(request, task_id):
                 journal.task = task
                 journal.author = request.user
                 journal.save()
+
+                task.last_modification = datetime.datetime.now()
+                task.save()
         else:
             # initialize a new form
             form = JournalForm()
@@ -296,6 +301,8 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
+                task.last_modification = datetime.datetime.now()
+                task.save()
                 return redirect("task", task_id=task.id)
         else:
             # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
@@ -331,6 +338,7 @@ def edittask_view(request, task_id):
                 task = form.save(commit=False)
                 # Manually set the project id. Otherwise a new task would be created
                 task.id = task_id
+                task.last_modification = datetime.datetime.now()
                 task.save()
                 return redirect("task", task_id=task.id)
         else:

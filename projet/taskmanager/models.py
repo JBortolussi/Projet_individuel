@@ -37,6 +37,7 @@ class Task(models.Model):
     due_date = models.DateField(verbose_name="Date de fin")
     priority = models.IntegerField()
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    last_modification = models.TimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name
