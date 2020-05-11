@@ -6,11 +6,6 @@ filter_div = document.getElementById("filter-div");
 let filter_on = new Boolean(false);
 let input_number = 0;
 
-function filter_button_function(){
-    row_filter.classList.toggle('unactive');
-}
-filter_button.onclick = filter_button_function;
-
 function remove_input(id) {
     // let input = document.getElementById("filter-sel-" + id);
     // let text = document.getElementById("filter-txt-" + id);
@@ -201,7 +196,6 @@ function add_input(text_value="", select_value="assign") {
 
 
 //remplissage du filter-form
-
 add_input();
 
 
