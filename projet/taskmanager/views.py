@@ -7,7 +7,7 @@ from .forms import ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Projet, Task, Journal
+from .models import Projet, Task, Journal, Status
 
 
 # REPLACED BY GENERIC VIEWS
@@ -352,9 +352,16 @@ def my_profile(request):
 @login_required()
 def taches_assignees(request):
 
-    tasks = Task.objects.filter(assignee=request.user)
+    tasks = Task.objects.filter(assignee=request.user).exclude(status__name__contains="Finished")
 
     return render(request, "tachesassignees.html", locals())
+
+@login_required()
+def taches_terminees(request):
+
+    tasks = Task.objects.filter(assignee=request.user, status__name__contains="Finished")
+
+    return render(request, "tachesterminees.html", locals())
 
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):

@@ -16,4 +16,5 @@ urlpatterns = [
     path('edittask/<task_id>', views.edittask_view, name="edittask"),
     path('myprofile/1', views.my_profile, name="myprofile"),
     path('myprofile/2', views.taches_assignees, name="taches_assignees"),
+    path('myprofile/3', views.taches_terminees, name="taches_terminees"),
 ]
