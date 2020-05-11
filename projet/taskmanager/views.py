@@ -349,6 +349,13 @@ def my_profile(request):
     return render(request, "myprofile.html", locals())
 
 
+@login_required()
+def taches_assignees(request):
+
+    tasks = Task.objects.filter(assignee=request.user)
+
+    return render(request, "tachesassignees.html", locals())
+
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):
     if request.method == 'POST':
