@@ -26,7 +26,7 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container">
         {# Welcome #}
-        <a class="navbar-brand" href="#">Welcome {{ user.first_name|default:user.username }} !</a>
+        <a class="navbar-brand" href="#">Welcome {{ user.username }} !</a>
         {# If the user is logged in, show all nav bar #}
 
 
@@ -69,7 +69,7 @@
     <header class="jumbotron my-3 text-center">
         <a class="" style="color:inherit;text-decoration: none;" href="{% url 'projects' %}">
             <h1 class="align-middle display-3 "><img class="mr-4" src="{% static 'img/logo.png' %}"
-                                                     style="width:12%x; height:12%;">Fas-Task</h1>
+                                                     style="width:12%; height:12%;">Fas-Task</h1>
         </a>
         <h5>A rapid and easy tool to manage your projects</h5>
     </header>
