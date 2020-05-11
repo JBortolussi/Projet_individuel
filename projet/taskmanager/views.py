@@ -337,7 +337,7 @@ def taches_recents_home(request):
 def taches_recents(request, project_id):
 
     project = get_object_or_404(Projet, id=project_id)
-    tasks = project.task_set.all()
+    tasks = project.task_set.order_by('-last_modification')
 
     return render(request, "tachesrecents.html", locals())
 
