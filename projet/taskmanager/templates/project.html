@@ -16,17 +16,39 @@
 
 
 <h1 style="display: inline">{{project.name}}</h1>
-<button id="filter_button" type="button" style="margin-left: 3%" class="btn btn-primary" >Filter</button>
+<button id="filter_button" data-toggle="modal" data-target=".bd-example-modal-xl" type="button" style="margin-left: 3%" class="btn btn-primary" >Filter</button>
 <a class="custom_link" href="{% url "newtask" project.id%}">
     <i data-toggle="tooltip" data-placement="left" title="Ajouter une tache" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
 </a>
 
 <div class="container-fluid" style="margin-top: 1%">
+    <div class="modal fade bd-example-modal-xl" tabindex="-1" role="dialog" aria-labelledby="myExtraLargeModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form id="filter-form" action="" method="get">
+                <div class="modal-header">
+                    <h4 class="modal-title">Modal Heading</h4>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="filter-modal-body">
+                        <br>
+                        <div id="filter-div" class="container-fluid" style=""></div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <i data-toggle="tooltip" data-placement="right" title="Add a filter" class="fas fa-plus-circle fa-2x mr-auto" style="float: left;color: green;" onclick="add_input()"></i>
+                    <input type="submit" class="btn btn-success">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </form>
+        </div>
+      </div>
+    </div>
     <div class="unactive" id="row-filter">
-        <form id="filter-form" action="" method="get">
-            <input type="submit">
-        </form>
-        <button id="button-add"onclick="add_input()">add</button>
+
     </div>
 
 <div class="row" id="row-table">

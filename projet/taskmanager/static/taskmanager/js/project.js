@@ -1,7 +1,7 @@
 filter_button = document.getElementById("filter_button");
 row_filter = document.getElementById("row-filter");
 // row_table =  document.getElementById("row-table");
-form = document.getElementById("filter-form");
+filter_div = document.getElementById("filter-div");
 
 let filter_on = new Boolean(false);
 let input_number = 0;
@@ -158,14 +158,19 @@ function add_input(text_value="", select_value="assign") {
         }
     });
 
-    let del = document.createElement("INPUT");
+    let del = document.createElement("I");
     del.setAttribute('id', "filter-del-" + input_number);
-    del.setAttribute('type', "button");
-    del.setAttribute('value', 'remove');
+    del.setAttribute('data-toggle', 'tooltip');
+    del.setAttribute('data-placement', 'right');
+    del.setAttribute('title', 'Remove filter');
+    del.setAttribute('class', "fas fa-times fa-2x");
+    del.style.color = 'tomato';
+    // del.setAttribute('type', "button");
+    // del.setAttribute('value', 'remove');
     del.setAttribute('onclick', "remove_input(" + input_number + ")");
 
     let col1 = document.createElement('DIV');
-    col1.setAttribute('class', 'col-sm-2');
+    col1.setAttribute('class', 'col-sm-3');
     col1.appendChild(select);
 
     let col2 = document.createElement('DIV');
@@ -184,12 +189,14 @@ function add_input(text_value="", select_value="assign") {
     let row = document.createElement('DIV');
     row.setAttribute('id', 'filter-row-' + input_number);
     row.setAttribute('class', 'row');
+    row.appendChild(document.createElement("BR"));
+    row.appendChild(document.createElement("BR"));
     row.appendChild(col1);
     row.appendChild(col2);
     row.appendChild(col3);
     row.appendChild(col4);
 
-    form.appendChild(row);
+    filter_div.appendChild(row);
 }
 
 
