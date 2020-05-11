@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.db.models.signals import  m2m_changed, pre_delete
 from django.utils import timezone
 
+# Create your models here.
 
 class ProjetAdmin(admin.ModelAdmin):
     # configuration vue projet dans Admin
@@ -35,7 +36,7 @@ class Projet(models.Model):
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=100)
 
     class Meta:
         verbose_name = "Status"
@@ -76,6 +77,7 @@ class Task(models.Model):
     due_date = models.DateField(default=date.today, verbose_name="Date de fin")
     priority = models.IntegerField(default=1, help_text="Between 1 and 10")
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, default=1)
+    last_modification = models.TimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name

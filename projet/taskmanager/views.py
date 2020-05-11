@@ -2,6 +2,9 @@ import csv
 import datetime
 import io
 
+import datetime
+
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core import serializers
@@ -11,8 +14,10 @@ from django.db.models import ManyToManyField
 from django.http import HttpResponse
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm, ExportDataForm
+from django.db.models import Q
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from .models import Projet, Task, Journal, Status
 
@@ -68,10 +73,11 @@ def deconnexion(request):
     """
     logout(request)
     return HttpResponseRedirect(reverse(connexion))
+from .models import Projet, Task, Journal, Status
 
 
 @login_required()
-def redir(request):
+def redir():
     return redirect('projects')
 
 
@@ -134,6 +140,7 @@ def delete_project_view(request, id):
 
     # Check if the logged in user is allowed to delete this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+
         # Eventually delete the project
         project.delete()
 
@@ -174,6 +181,8 @@ def edit_project_view(request, project_id):
         else:
             form = ProjectForm(user=request.user, instance=project)
         return render(request, 'newProject.html', locals())
+    else:
+        return redirect("projects")
 
     return redirect("projects")
 
@@ -190,14 +199,43 @@ def project_view(request, project_id):
     allowed to see this project
     """
 
+
+
     # Retrieve the project to to be displayed. Raise an error if this project does not exist
     project = get_object_or_404(Projet, id=project_id)
 
-    # Check if the logged in user is allowed to see this project
-    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+    if request.method == 'GET':
+        print(request.GET)
 
+        filters = Q()
+
+        for key in request.GET:
+            entry = request.GET.getlist(key)
+
+            method = entry[0]
+            value = entry[1]
+            link = entry[2]
+
+            if method == 'assign':
+                if link == "and":
+                    filters &= Q(assignee__id=value)
+                else:
+                    filters |= Q(assignee__id=value)
+            elif method == 'not_assign':
+                if link == "and":
+                    filters &= ~Q(assignee__id=value)
+                else:
+                    filters |= ~Q(assignee__id=value)
+
+        tasks = project.task_set.filter(filters).order_by('-priority')
+    else:
         # Retrieve all the task of the project and order them
         tasks = project.task_set.all().order_by('-priority')
+
+
+    # Check if the logged in user is allowed to see this project
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        users = project.members.all()
         return render(request, 'project.html', locals())
     else:
         return redirect("projects")
@@ -227,11 +265,15 @@ def task_view(request, task_id):
             # Build the form and verify it
             form = JournalForm(request.POST)
             if form.is_valid():
+
                 # Save the Journal and set the project and author fields
                 journal = form.save(commit=False)  # Does not save the Journal in the database
                 journal.task = task
                 journal.author = request.user
                 journal.save()
+
+                task.last_modification = datetime.datetime.now()
+                task.save()
         else:
             # initialize a new form
             form = JournalForm()
@@ -269,10 +311,14 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
+                task.last_modification = datetime.datetime.now()
+                task.save()
                 return redirect("task", task_id=task.id)
         else:
             # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
             form = TaskForm(project)
+    else:
+        return redirect("projects")
     return render(request, "newtask.html", locals())
 
 
@@ -302,12 +348,64 @@ def edittask_view(request, task_id):
                 task = form.save(commit=False)
                 # Manually set the project id. Otherwise a new task would be created
                 task.id = task_id
+                task.last_modification = datetime.datetime.now()
                 task.save()
                 return redirect("task", task_id=task.id)
         else:
             # Initialize the form with the task
             form = TaskForm(project, instance=task)
+    else:
+        return redirect("projects")
     return render(request, "newtask.html", locals())
+
+
+@login_required()
+def my_profile(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "myprofile.html", locals())
+
+
+@login_required()
+def taches_assignees(request):
+
+    tasks = Task.objects.filter(assignee=request.user).exclude(status__name__contains="Finished")
+
+    return render(request, "tachesassignees.html", locals())
+
+
+@login_required()
+def taches_terminees(request):
+
+    tasks = Task.objects.filter(assignee=request.user, status__name__contains="Finished")
+
+    return render(request, "tachesterminees.html", locals())
+
+
+@login_required()
+def taches_projets(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "tachesprojets.html", locals())
+
+@login_required()
+def taches_recents_home(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "tachesrecentshome.html", locals())
+
+
+@login_required()
+def taches_recents(request, project_id):
+
+    project = get_object_or_404(Projet, id=project_id)
+    tasks = project.task_set.order_by('-last_modification')
+
+    return render(request, "tachesrecents.html", locals())
+
 
 
 # Sign up page is the only view which doesn't require a log in for obvious reasons
@@ -324,6 +422,7 @@ def signup(request):
 
             # Automatically log in the user once they have signed up and redirect them to the home screen
             login(request, user)
+            messages.success(request, 'You have successfully registered and logged in.')
             return redirect('projects')
     else:
         form = UserCreationForm()

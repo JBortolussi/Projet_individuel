@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bootstrap4',
+    'crispy_forms',
     'taskmanager',
 ]
 
@@ -126,4 +127,12 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
-LOGIN_URL = '/connexion/'
+# Login and logout
+LOGIN_REDIRECT_URL = '/projects'
+
+LOGOUT_REDIRECT_URL = '/login/'
+
+LOGIN_URL = '/login/'
+
+# pour faire le render des forms en Bootstrap 4
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
