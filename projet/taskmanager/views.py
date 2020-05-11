@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
@@ -162,6 +163,8 @@ def edit_project_view(request, project_id):
         else:
             form = ProjectForm(user=request.user, instance=project)
         return render(request, 'newProject.html', locals())
+    else:
+        return redirect("projects")
 
     return redirect("projects")
 
@@ -178,14 +181,42 @@ def project_view(request, project_id):
     allowed to see this project
     """
 
+
+
     # Retrieve the project to to be displayed. Raise an error if this project does not exist
     project = get_object_or_404(Projet, id=project_id)
 
-    # Check if the logged in user is allowed to see this project
-    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+    if request.method == 'GET':
+        print(request.GET)
 
+        filters = Q()
+
+        for key in request.GET:
+            entry = request.GET.getlist(key)
+            link = entry[0]
+            method = entry[1]
+            value = entry[2]
+
+            if method == 'assign':
+                if link == "and":
+                    filters &= Q(assignee__id=value)
+                else:
+                    filters |= Q(assignee__id=value)
+            elif method == 'not_assign':
+                if link == "and":
+                    filters &= ~Q(assignee__id=value)
+                else:
+                    filters |= ~Q(assignee__id=value)
+
+        tasks = project.task_set.filter(filters).order_by('-priority')
+    else:
         # Retrieve all the task of the project and order them
         tasks = project.task_set.all().order_by('-priority')
+
+
+    # Check if the logged in user is allowed to see this project
+    if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        users = project.members.all()
         return render(request, 'project.html', locals())
     else:
         return redirect("projects")
@@ -262,6 +293,8 @@ def newtask_view(request, project_id):
         else:
             # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
             form = TaskForm(project)
+    else:
+        return redirect("projects")
     return render(request, "newtask.html", locals())
 
 
@@ -296,4 +329,6 @@ def edittask_view(request, task_id):
         else:
             # Initialize the form with the task
             form = TaskForm(project, instance=task)
+    else:
+        return redirect("projects")
     return render(request, "newtask.html", locals())
