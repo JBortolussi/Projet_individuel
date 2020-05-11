@@ -44,6 +44,36 @@ function new_select_filter(id) {
     not_assign.appendChild(document.createTextNode('Not assign to'));
     input.appendChild(not_assign);
 
+    let status = document.createElement("OPTION");
+    status.setAttribute('value', 'status');
+    status.appendChild(document.createTextNode('Status :'));
+    input.appendChild(status);
+
+    let not_status = document.createElement("OPTION");
+    not_status.setAttribute('value', 'not_status');
+    not_status.appendChild(document.createTextNode('Not status :'));
+    input.appendChild(not_status);
+
+    let start_before = document.createElement("OPTION");
+    start_before.setAttribute('value', 'start_before');
+    start_before.appendChild(document.createTextNode('To be started before :'));
+    input.appendChild(start_before);
+
+    let start_after = document.createElement("OPTION");
+    start_after.setAttribute('value', 'start_after');
+    start_after.appendChild(document.createTextNode('To be started after :'));
+    input.appendChild(start_after);
+
+    let end_before = document.createElement("OPTION");
+    end_before.setAttribute('value', 'end_before');
+    end_before.appendChild(document.createTextNode('To be ended before :'));
+    input.appendChild(end_before);
+
+    let end_after = document.createElement("OPTION");
+    end_after.setAttribute('value', 'end_after');
+    end_after.appendChild(document.createTextNode('To be ended after :'));
+    input.appendChild(end_after);
+
     return input;
 }
 
@@ -64,7 +94,6 @@ function new_select_link(id) {
 
     return select;
 }
-
 
 let text_dic = {};
 function add_input(text_value="", select_value="assign") {
@@ -95,19 +124,37 @@ function add_input(text_value="", select_value="assign") {
     }
     text_user.value = text_value;
 
-    let text_tab = [text_text, text_user];
-    text_dic['' + input_number] = text_tab;
+    let text_status = document.createElement("SELECT");
+    text_status.setAttribute('name', input_number);
+    text_status.setAttribute('class', 'form-control');
+    for (let i = 0; i < status_tab.length; i++){
+        let opt = document.createElement("OPTION");
+        opt.setAttribute('value', status_tab[i][1]);
+        opt.appendChild(document.createTextNode(status_tab[i][0]));
+        text_status.appendChild(opt);
+    }
+    text_status.value = text_value;
+
+    let text_date = document.createElement("INPUT");
+    text_date.setAttribute('name', input_number);
+    text_date.setAttribute('type', 'date');
+    text_date.setAttribute('class', 'form-control');
+    text_date.value = text_value;
+
+    text_dic['' + input_number] = [text_text, text_user, text_status, text_date];
 
     select.addEventListener("change",function() {
         id = this.name;
         col2 = document.getElementById("col2-" + id);
-        child = col3.firstChild;
-        col3.removeChild(child);
+        child = col2.firstChild;
+        col2.removeChild(child);
 
-        if (this.value == "assign"){
-            col3.appendChild(text_dic[''+id][1]);
-        } else if (this.value == "not_assign") {
-            col3.appendChild(text_dic[''+id][1]);
+        if (this.value == "assign" || this.value == "not_assign"){
+            col2.appendChild(text_dic[''+id][1]);
+        } else if (this.value == "status" || this.value == "not_status"){
+            col2.appendChild(text_dic[''+id][2]);
+        } else  if (this.value == "start_after" || this.value == "start_before" || this.value == "end_before" || this.value == "end_after"){
+            col2.appendChild(text_dic[''+id][3]);
         }
     });
 
@@ -127,7 +174,7 @@ function add_input(text_value="", select_value="assign") {
     col2.appendChild(text_dic['' + input_number][1]);
 
     let col3 = document.createElement('DIV');
-    col3.setAttribute('class', 'col-sm-1');
+    col3.setAttribute('class', 'col-sm-2');
     col3.appendChild(link);
 
     let col4 = document.createElement('DIV');

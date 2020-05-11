@@ -7,7 +7,7 @@ from .forms import ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Projet, Task, Journal
+from .models import Projet, Task, Journal, Status
 
 
 # REPLACED BY GENERIC VIEWS
@@ -200,6 +200,9 @@ def project_view(request, project_id):
         for key in request.GET:
             entry = request.GET.getlist(key)
 
+            if len(entry) != 3:
+                continue
+
             method = entry[0]
             value = entry[1]
             link = entry[2]
@@ -214,7 +217,36 @@ def project_view(request, project_id):
                     filters &= ~Q(assignee__id=value)
                 else:
                     filters |= ~Q(assignee__id=value)
-
+            elif method == 'status':
+                if link == "and":
+                    filters &= Q(status__id=value)
+                else:
+                    filters |= Q(status__id=value)
+            elif method == 'not_status':
+                if link == "and":
+                    filters &= ~Q(status__id=value)
+                else:
+                    filters |= ~Q(status__id=value)
+            elif method == 'start_before':
+                if link == "and":
+                    filters &= Q(start_date__lte=value)
+                else:
+                    filters |= Q(start_date__lte=value)
+            elif method == 'start_after':
+                if link == "and":
+                    filters &= Q(start_date__gte=value)
+                else:
+                    filters |= Q(start_date__gte=value)
+            elif method == 'end_before':
+                if link == "and":
+                    filters &= Q(due_date__lte=value)
+                else:
+                    filters |= Q(due_date__lte=value)
+            elif method == 'end_after':
+                if link == "and":
+                    filters &= Q(due_date__gte=value)
+                else:
+                    filters |= Q(due_date__gte=value)
         tasks = project.task_set.filter(filters).order_by('-priority')
     else:
         # Retrieve all the task of the project and order them
@@ -223,6 +255,7 @@ def project_view(request, project_id):
 
     # Check if the logged in user is allowed to see this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        status = Status.objects.all()
         users = project.members.all()
         return render(request, 'project.html', locals())
     else:

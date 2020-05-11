@@ -34,6 +34,7 @@
     <thead>
         <tr>
             <th>Task</th>
+            <th>Status</th>
             <th>Assignee</th>
             <th>Start Date</th>
             <th>Due Date</th>
@@ -43,6 +44,7 @@
         {% for task in tasks %}
             <tr>
                 <td><a class="custom_link" href="{% url "task" task.id %}">{{task.name}}</a> </td>
+                <td><span class="badge badge-warning">{{task.status.name}}</span></td>
                 {% if task.assignee == None %}
                     <td><span class="badge badge-danger">Personne</span></td>
                 {% else %}
@@ -52,7 +54,6 @@
                         <td><span class="badge badge-primary">{{task.assignee.first_name}} {{task.assignee.last_name}}</span></td>
                     {% endif %}
                 {% endif %}
-
                 <td>{{task.start_date}}</td>
                 <td>{{task.due_date}}
                     <div style="float: right">
@@ -73,6 +74,11 @@
     let user_tab = [];
     {% for user in users %}
     user_tab.push(["{{user}}", "{{user.id}}"]);
+    {% endfor %}
+
+    let status_tab = [];
+    {% for stat in status %}
+    status_tab.push(["{{stat}}", "{{stat.id}}"]);
     {% endfor %}
 </script>
 <script src="{% static 'taskmanager/js/project.js' %}"></script>
