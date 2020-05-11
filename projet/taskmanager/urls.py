@@ -18,4 +18,6 @@ urlpatterns = [
     path('myprofile/2', views.taches_assignees, name="taches_assignees"),
     path('myprofile/3', views.taches_terminees, name="taches_terminees"),
     path('myprofile/4', views.taches_projets, name="taches_projets"),
+    path('myprofile/5', views.taches_recents_home, name="taches_recents_home"),
+    path('myprofile/5/<int:project_id>', views.taches_recents, name="taches_recents"),
 ]
