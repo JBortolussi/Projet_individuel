@@ -1,66 +1,72 @@
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
-from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm
+from .forms import ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-
-# Create your views here.
 from .models import Projet, Task, Journal
 
 
-def connexion(request):
-    """View for the connexion page
+# REPLACED BY GENERIC VIEWS
+# def connexion(request):
+#     """View for the connexion page
+#
+#     This view handel the treatment the the connexion form.
+#     If the log in process is successful, redirect the user to the project list page
+#
+#     :param request: the request data, include the form data if an user tried to logged in
+#     :return: Either the connexion HttpResponse or the redirection to the project list page if the user logged in
+#     """
+#
+#     # If true an error will be displayed
+#     error = False
+#
+#     # No need to use connexion method if already logged in
+#     if request.user.is_authenticated:
+#         return redirect("projects")
+#
+#     # Someone try to connected and had sent a form
+#     if request.method == "POST":
+#
+#         # retrieve the user's data
+#         form = ConnexionForm(request.POST)
+#         if form.is_valid():
+#             username = form.cleaned_data["username"]
+#             password = form.cleaned_data["password"]
+#
+#             # Test if the user can be log in
+#             user = authenticate(username=username, password=password)
+#             # Success
+#             if user:
+#                 # Actually log the user in
+#                 login(request, user)
+#                 return redirect("projects")
+#             # Failure
+#             else:
+#                 error = True
+#     # A new user open the connexion view
+#     else:
+#         form = ConnexionForm()
+#
+#     return render(request, 'connexion.html', locals())
+#
+#
+# def deconnexion(request):
+#     """Handel the log out process
+#
+#     :param request: the request data, shall include the logged user's data (no error if not)
+#     :return: Redirect to the connexion page
+#     """
+#     logout(request)
+#     return HttpResponseRedirect(reverse(connexion))
 
-    This view handel the treatment the the connexion form.
-    If the log in process is successful, redirect the user to the project list page
 
-    :param request: the request data, include the form data if an user tried to logged in
-    :return: Either the connexion HttpResponse or the redirection to the project list page if the user logged in
-    """
-
-    # If true an error will be displayed
-    error = False
-
-    # No need to use connexion method if already logged in
-    if request.user.is_authenticated:
-        return redirect("projects")
-
-    # Someone try to connected and had sent a form
-    if request.method == "POST":
-
-        # retrieve the user's data
-        form = ConnexionForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data["username"]
-            password = form.cleaned_data["password"]
-
-            # Test if the user can be log in
-            user = authenticate(username=username, password=password)
-            # Success
-            if user:
-                # Actually log the user in
-                login(request, user)
-                return redirect("projects")
-            # Failure
-            else:
-                error = True
-    # A new user open the connexion view
-    else:
-        form = ConnexionForm()
-
-    return render(request, 'connexion.html', locals())
-
-
-def deconnexion(request):
-    """Handel the log out process
-
-    :param request: the request data, shall include the logged user's data (no error if not)
-    :return: Redirect to the connexion page
-    """
-    logout(request)
-    return HttpResponseRedirect(reverse(connexion))
+@login_required()
+def redir(request):
+    return redirect('projects')
 
 
 @login_required()
@@ -333,3 +339,23 @@ def edittask_view(request, task_id):
     else:
         return redirect("projects")
     return render(request, "newtask.html", locals())
+
+# Sign up page is the only view which doesn't require a log in for obvious reasons
+def signup(request):
+    if request.method == 'POST':
+
+        # Form is a existing template imported from the library django.contrib.auth.forms
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+
+            # Automatically log in the user once they have signed up and redirect them to the home screen
+            login(request, user)
+            messages.success(request, 'You have successfully registered and logged in.')
+            return redirect('projects')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', locals())

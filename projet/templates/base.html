@@ -6,58 +6,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% block links %}{% endblock %}
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
-    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
     <meta charset="UTF-8">
-    <title>{% block title %}Title{% endblock %}</title>
-</head>
-<body style="margin: 1%">
-    <div class="jumbotron text-left">
-        <h1 style="font-size:100px">Calend-me</h1>
-        <p>A cool app to plan nice stuff</p>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <!--If the user is logged in, say welcome and offer him to log out-->
-        {% if user.is_authenticated %}
-        <hr color="grey">
-        <div style="display: inline">
-            Welcome {{user.username}}
+    <title>Fas-Task {% block title %}{% endblock %}</title>
+
+    {# fichier statics: favicon et css #}
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+          integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/base.css' %}">
+
+    <link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}"/>
+
+</head>
+
+<body style="padding-top: 56px">
+
+{# NAVIGATION BAR #}
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+        {# Welcome #}
+        <a class="navbar-brand" href="#">Welcome {{ user.first_name|default:user.username }} !</a>
+        {# If the user is logged in, show all nav bar #}
+
+
+        {# Responsive behavior: show button on little devices #}
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'projects' %}">Home
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">My profile</a>
+                    </li>
+                    {# Logout button #}
+                    <li class="nav-item">
+                        <a href="{% url "logout" %}" class="btn btn-danger d-none d-inline-block ml-md-2">
+                            <i class="fa fa-sign-out-alt align-middle" aria-hidden="true"></i>
+                            <span class="align-middle">Logout</span>
+                        </a>
+                    </li>
+                {% else %}
+                    {% block nav_button %}{% endblock %}
+                {% endif %}
+            </ul>
         </div>
-        <!--log out button-->
-        <div style="display: inline;float: right">
-            <a href="{% url "deconnexion" %}">
-                <i data-toggle="tooltip" data-placement="left" title="Deconnexion" class="fas fa-sign-out-alt fa-3x" style="float: right;color: dodgerblue;"></i>
-            </a>
-        </div>
-        {% endif %}
     </div>
-    {% if user.is_authenticated %}
-    <!--Allow following templates to delete this line-->
+</nav>
+
+{# PAGE CONTENT #}
+<div class="container">
+
+    {# JUMBOTRON HEADER #}
+    <header class="jumbotron my-3 text-center">
+        <a class="" style="color:inherit;text-decoration: none;" href="{% url 'projects' %}">
+            <h1 class="align-middle display-3 "><img class="mr-4" src="{% static 'img/logo.png' %}"
+                                                     style="width:12%x; height:12%;">Fas-Task</h1>
+        </a>
+        <h5>A rapid and easy tool to manage your projects</h5>
+    </header>
+
+    {# ALERTS MESSAGES #}
+    {% if messages %}
+        {% for message in messages %}
+            {# alert if sign up successfully: only one implemented #}
+            <div class="alert alert-success alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {# BLOCK NAVIGATION #}
+    {# to be updated #}
     {% block to_remove_path %}
-        <div  style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
+        <div style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
             {% block line_path %}{% endblock %}
         </div>
         <br>
     {% endblock %}
-    {% endif %}
 
     <!--Main block of the page-->
     {% block page %} Nothing to be displayed {% endblock %}
     <div style="font-size: 15px">
         <hr size="1" color="grey">
-        2020
     </div>
+
+    {# FOOTER #}
+    <footer class="py-5 bg-dark">
+        <div class="container">
+            <p class="m-0 text-center text-white">Copyright &copy; 2020 ISAE-SUPAERO</p>
+        </div>
+    </footer>
+</div>
+
 
 </body>
 
 
 <script>
-// script that allow bootstratp tooltip to work properly
-$(document).ready(function(){
-  $('[data-toggle="tooltip"]').tooltip();
-});
-// Allow following templates to have their own scripts.
-// Be aware that the script tags are no more required in this block.
-{% block scriptBase %}{% endblock %}
+    // script that allow bootstratp tooltip to work properly
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
+    // Allow following templates to have their own scripts.
+    // Be aware that the script tags are no more required in this block.
+    {% block scriptBase %}{% endblock %}
 </script>
 </html>
