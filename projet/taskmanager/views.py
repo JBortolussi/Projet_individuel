@@ -193,9 +193,10 @@ def project_view(request, project_id):
 
         for key in request.GET:
             entry = request.GET.getlist(key)
-            link = entry[0]
-            method = entry[1]
-            value = entry[2]
+
+            method = entry[0]
+            value = entry[1]
+            link = entry[2]
 
             if method == 'assign':
                 if link == "and":
