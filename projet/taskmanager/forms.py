@@ -122,9 +122,9 @@ class ExportDataForm(forms.Form):
     status = forms.BooleanField(required=False)
 
     FORMAT_FIELD_CHOICES = [
-        ('CSV', 'csv'),
-        ('JSON', 'json'),
-        ('XML', 'xml'),
-        ('XLS', 'xls (MS Excel)'),
+        ('csv', 'csv'),
+        ('json', 'json'),
+        ('xml', 'xml'),
+        ('xls', 'xls (MS Excel)'),
     ]
     file_format = forms.ChoiceField(choices=FORMAT_FIELD_CHOICES)
