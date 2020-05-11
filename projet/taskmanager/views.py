@@ -1,10 +1,13 @@
 import csv
+import datetime
 import io
 
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.core import serializers
 from zipfile import ZipFile
+
+from django.db.models import ManyToManyField
 from django.http import HttpResponse
 from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
 from .forms import ConnexionForm, ProjectForm, JournalForm, TaskForm, ExportDataForm
@@ -359,129 +362,22 @@ def download_data(request, file_format, exp_u=0, exp_p=0, exp_t=0, exp_j=0, exp_
 
     # models queryset to be used to generate to export the database
     user = request.user
+    user_queryset = User.objects.filter(username=request.user.username)
     projects_queryset = user.projets.all()  # only projects that the user has access to
     tasks_queryset = Task.objects.filter(projet__in=projects_queryset)  # all the tasks in these projects
     journals_queryset = Journal.objects.filter(task__in=tasks_queryset)  # all the journals in these tasks
+    status_queryset = Status.objects.all()
 
-    '''
-    I preferred not to write this lines as as function to use for each model queryset because each model has some
-    peculiarities and I want to personally handle the csv files formatting
-    '''
-    # if the user wants to export his personal data
     if exp_u:
-        # create a temporary stream output (temp file)
-        output = io.StringIO()  # temporary stream output
-        # the following depends on the file format chosen
-
-        if file_format == 'csv':
-            # create an instance of csv writer that writes on the stream 'output' opened above
-            csv_user = csv.writer(output, dialect='excel', delimiter=';')
-            csv_user.writerow(['USERNAME', 'NAME', 'SURNAME', 'E-MAIL'])
-            # write the informations on the csv
-            csv_user.writerow([user.username, user.first_name, user.last_name, user.email])
-        elif file_format == 'json' or file_format == 'xml':
-            # uses django serialization to serialize in 'json' or 'xml'
-            json_xml_user = serializers.serialize(file_format, [user],
-                                                  fields=('username', 'first_name', 'last_name', 'email'),
-                                                  use_natural_primary_keys=True)  # uses the username as primary key
-            # write on the output stream
-            output.write(json_xml_user)
-
-        # add the extension to the file name
-        file_name = 'user_data.' + file_format
-        # write the file generated from the output stream to the zip file generated in the beginning
-        data_zip.writestr(file_name, output.getvalue())
-        # in the end close the output stream
-        output.close()
-
-    '''
-    in the next lines, the steps to generate the files for the different models are always the same
-    I didn't find a way to make it shorter because each models has its own particularities
-    The things that are a bit different will be highlighted
-    '''
-    # if the user requires his projects
+        dump_to_file_format(user_queryset, file_format, data_zip)
     if exp_p:
-        output = io.StringIO()
-        if file_format == 'csv':
-            csv_projects = csv.writer(output, dialect='excel', delimiter=';')
-            csv_projects.writerow(['NAME', 'MEMBERS', 'TASKS'])
-            for project in projects_queryset:
-                # build a comma separated list with all the users and the tasks that are in the project
-                members = ', '.join([member.username for member in project.members.all()])
-                # the tasks are included for the sake of completeness, even if it is not an attribute of the model
-                tasks = ', '.join([task.name for task in project.task_set.all()])
-                csv_projects.writerow([project.name, members, tasks])
-        elif file_format == 'json' or file_format == 'xml':
-            json_xml_projects = serializers.serialize(file_format, projects_queryset,
-                                                      use_natural_foreign_keys=True,  # foreign keys not as numbers
-                                                      use_natural_primary_keys=True)  # project name used as primary key
-            output.write(json_xml_projects)
-
-        file_name = 'projects_data.' + file_format
-        data_zip.writestr(file_name, output.getvalue())
-        output.close()
-
-    # if the user requires all the tasks in his projects
+        dump_to_file_format(projects_queryset, file_format, data_zip)
     if exp_t:
-        output = io.StringIO()
-        if file_format == 'csv':
-            csv_tasks = csv.writer(output, dialect='excel', delimiter=';')
-            csv_tasks.writerow(
-                ['PROJECT', 'NAME', 'ASSIGNED TO', 'STATUS', 'PRIORITY', 'START DATE', 'DUE DATE', 'DESCRIPTION'])
-            for task in tasks_queryset:
-                # note that the date are converted into strings with strftime() (in an appropriate format)
-                task_data = [task.projet, task.name, task.assignee, task.status, task.priority,
-                             task.start_date.strftime("%m/%d/%Y"), task.due_date.strftime("%m/%d/%Y"), task.description]
-                csv_tasks.writerow(task_data)
-        elif file_format == 'json' or file_format == 'xml':
-            json_xml_tasks = serializers.serialize(file_format, tasks_queryset, use_natural_foreign_keys=True,
-                                                   use_natural_primary_keys=True)
-            output.write(json_xml_tasks)
-
-        file_name = 'tasks_data.' + file_format
-        data_zip.writestr(file_name, output.getvalue())
-        output.close()
-
-        # if the user requires all the journals of the tasks in his projects
+        dump_to_file_format(tasks_queryset, file_format, data_zip)
     if exp_j:
-        output = io.StringIO()
-        if file_format == 'csv':
-            csv_journals = csv.writer(output, dialect='excel', delimiter=';')
-            csv_journals.writerow(['PROJECT', 'TASK', 'DATE', 'AUTHOR', 'ENTRY'])
-            for journal in journals_queryset:
-                # note that:
-                # 1. the datetime is converted in a proper way into a string
-                # 2. also the information on the project is included
-                journal_data = [journal.task.projet, journal.task, journal.date.strftime("%m/%d/%Y, %H:%M:%S"),
-                                journal.author, journal.entry]
-                csv_journals.writerow(journal_data)
-        elif file_format == 'json' or file_format == 'xml':
-            json_xml_journals = serializers.serialize(file_format, journals_queryset, use_natural_foreign_keys=True,
-                                                      use_natural_primary_keys=True)
-            output.write(json_xml_journals)
-
-        file_name = 'journals_data.' + file_format
-        data_zip.writestr(file_name, output.getvalue())  # write csv file to zip
-        output.close()
-
-    # if the user requires the status'
+        dump_to_file_format(journals_queryset, file_format, data_zip)
     if exp_s:
-        # this queryset does not depend on the others above
-        status_queryset = Status.objects.all()
-        output = io.StringIO()
-        if file_format == 'csv':
-            csv_status = csv.writer(output, dialect='excel', delimiter=';')
-            csv_status.writerow(['NAME'])
-            for status in status_queryset:
-                status_data = [status.name]
-                csv_status.writerow(status_data)
-        elif file_format == 'json' or file_format == 'xml':
-            json_xml_status = serializers.serialize(file_format, status_queryset, use_natural_primary_keys=True)
-            output.write(json_xml_status)
-
-        file_name = 'status_data.' + file_format
-        data_zip.writestr(file_name, output.getvalue())
-        output.close()
+        dump_to_file_format(status_queryset, file_format, data_zip)
 
     # closes the zip file
     data_zip.close()
@@ -489,3 +385,161 @@ def download_data(request, file_format, exp_u=0, exp_p=0, exp_t=0, exp_j=0, exp_
     # finally send the zip file as a the response HTTP
     return response
 
+    # '''
+    # I preferred not to write this lines as as function to use for each model queryset because each model has some
+    # peculiarities and I want to personally handle the csv files formatting
+    # '''
+    # # if the user wants to export his personal data
+    # # if exp_u:
+    # #     # create a temporary stream output (temp file)
+    # #     output = io.StringIO()  # temporary stream output
+    # #     # the following depends on the file format chosen
+    # #
+    # #     if file_format == 'csv':
+    # #         # create an instance of csv writer that writes on the stream 'output' opened above
+    # #         csv_user = csv.writer(output, dialect='excel', delimiter=';')
+    # #         csv_user.writerow(['USERNAME', 'NAME', 'SURNAME', 'E-MAIL'])
+    # #         # write the informations on the csv
+    # #         csv_user.writerow([user.username, user.first_name, user.last_name, user.email])
+    # #     elif file_format == 'json' or file_format == 'xml':
+    # #         # uses django serialization to serialize in 'json' or 'xml'
+    # #         json_xml_user = serializers.serialize(file_format, [user],
+    # #                                               fields=('username', 'first_name', 'last_name', 'email'),
+    # #                                               use_natural_primary_keys=True)  # uses the username as primary key
+    # #         # write on the output stream
+    # #         output.write(json_xml_user)
+    # #
+    # #     # add the extension to the file name
+    # #     file_name = 'user_data.' + file_format
+    # #     # write the file generated from the output stream to the zip file generated in the beginning
+    # #     data_zip.writestr(file_name, output.getvalue())
+    # #     # in the end close the output stream
+    # #     output.close()
+    # #
+    # # '''
+    # # in the next lines, the steps to generate the files for the different models are always the same
+    # # I didn't find a way to make it shorter because each models has its own particularities
+    # # The things that are a bit different will be highlighted
+    # # '''
+    # # # if the user requires his projects
+    # # if exp_p:
+    # #     output = io.StringIO()
+    # #     if file_format == 'csv':
+    # #         csv_projects = csv.writer(output, dialect='excel', delimiter=';')
+    # #         csv_projects.writerow(['NAME', 'MEMBERS', 'TASKS'])
+    # #         for project in projects_queryset:
+    # #             # build a comma separated list with all the users and the tasks that are in the project
+    # #             members = ', '.join([member.username for member in project.members.all()])
+    # #             # the tasks are included for the sake of completeness, even if it is not an attribute of the model
+    # #             tasks = ', '.join([task.name for task in project.task_set.all()])
+    # #             csv_projects.writerow([project.name, members, tasks])
+    # #     elif file_format == 'json' or file_format == 'xml':
+    # #         json_xml_projects = serializers.serialize(file_format, projects_queryset,
+    # #                                                   use_natural_foreign_keys=True,  # foreign keys not as numbers
+    # #                                                   use_natural_primary_keys=True)  # project name used as primary key
+    # #         output.write(json_xml_projects)
+    # #
+    # #     file_name = 'projects_data.' + file_format
+    # #     data_zip.writestr(file_name, output.getvalue())
+    # #     output.close()
+    # #
+    # # # if the user requires all the tasks in his projects
+    # # if exp_t:
+    # #     output = io.StringIO()
+    # #     if file_format == 'csv':
+    # #         csv_tasks = csv.writer(output, dialect='excel', delimiter=';')
+    # #         csv_tasks.writerow(
+    # #             ['PROJECT', 'NAME', 'ASSIGNED TO', 'STATUS', 'PRIORITY', 'START DATE', 'DUE DATE', 'DESCRIPTION'])
+    # #         for task in tasks_queryset:
+    # #             # note that the date are converted into strings with strftime() (in an appropriate format)
+    # #             task_data = [task.projet, task.name, task.assignee, task.status, task.priority,
+    # #                          task.start_date.strftime("%m/%d/%Y"), task.due_date.strftime("%m/%d/%Y"), task.description]
+    # #             csv_tasks.writerow(task_data)
+    # #     elif file_format == 'json' or file_format == 'xml':
+    # #         json_xml_tasks = serializers.serialize(file_format, tasks_queryset, use_natural_foreign_keys=True,
+    # #                                                use_natural_primary_keys=True)
+    # #         output.write(json_xml_tasks)
+    # #
+    # #     file_name = 'tasks_data.' + file_format
+    # #     data_zip.writestr(file_name, output.getvalue())
+    # #     output.close()
+    # #
+    # #     # if the user requires all the journals of the tasks in his projects
+    # # if exp_j:
+    # #     output = io.StringIO()
+    # #     if file_format == 'csv':
+    # #         csv_journals = csv.writer(output, dialect='excel', delimiter=';')
+    # #         csv_journals.writerow(['PROJECT', 'TASK', 'DATE', 'AUTHOR', 'ENTRY'])
+    # #         for journal in journals_queryset:
+    # #             # note that:
+    # #             # 1. the datetime is converted in a proper way into a string
+    # #             # 2. also the information on the project is included
+    # #             journal_data = [journal.task.projet, journal.task, journal.date.strftime("%m/%d/%Y, %H:%M:%S"),
+    # #                             journal.author, journal.entry]
+    # #             csv_journals.writerow(journal_data)
+    # #     elif file_format == 'json' or file_format == 'xml':
+    # #         json_xml_journals = serializers.serialize(file_format, journals_queryset, use_natural_foreign_keys=True,
+    # #                                                   use_natural_primary_keys=True)
+    # #         output.write(json_xml_journals)
+    # #
+    # #     file_name = 'journals_data.' + file_format
+    # #     data_zip.writestr(file_name, output.getvalue())  # write csv file to zip
+    # #     output.close()
+    # #
+    # # # if the user requires the status'
+    # # if exp_s:
+    # #     # this queryset does not depend on the others above
+    # #     status_queryset = Status.objects.all()
+    # #     output = io.StringIO()
+    # #     if file_format == 'csv':
+    # #         csv_status = csv.writer(output, dialect='excel', delimiter=';')
+    # #         csv_status.writerow(['NAME'])
+    # #         for status in status_queryset:
+    # #             status_data = [status.name]
+    # #             csv_status.writerow(status_data)
+    # #     elif file_format == 'json' or file_format == 'xml':
+    # #         json_xml_status = serializers.serialize(file_format, status_queryset, use_natural_primary_keys=True)
+    # #         output.write(json_xml_status)
+    # #
+    # #     file_name = 'status_data.' + file_format
+    # #     data_zip.writestr(file_name, output.getvalue())
+    # #     output.close()
+    # #
+
+
+
+def dump_to_file_format(queryset, file_format, data_zip):
+    output = io.StringIO()
+    # get queryset model
+    model = queryset.model
+    if file_format == 'csv':
+        csv_writer = csv.writer(output, dialect='excel', delimiter=';')
+        if model == Projet:
+            csv_writer.writerow(['ID', 'NAME', 'MEMBERS'])
+            for project in queryset:
+                # build a comma separated list with all the users and the tasks that are in the project
+                members = ', '.join([member.username for member in project.members.all()])
+                csv_writer.writerow([project.id, project.name, members])
+        else:
+            field_names = [field.name for field in model._meta.fields]
+            csv_writer.writerow(field.upper() for field in field_names)
+            for obj in queryset:
+                csv_writer.writerow([getattr(obj, field) for field in field_names])
+                # print([getattr(obj, field) for field in field_names])
+                # row = []
+                # for field in field_names:
+                #     field_value = getattr(obj, field)
+                #     # if isinstance(field_value, datetime):
+                #     # #     field_value = field_value.strftime("%m/%d/%Y, %H:%M:%S")
+                #     row.append(field_value)
+                # csv_writer.writerow(row)
+                # print(row)
+
+    elif file_format == 'json' or file_format == 'xml':
+        json_xml_projects = serializers.serialize(file_format, queryset, use_natural_foreign_keys=True,
+                                                  use_natural_primary_keys=True)
+        output.write(json_xml_projects)
+
+    file_name = model._meta.model.__name__.lower() + '_data.' + file_format
+    data_zip.writestr(file_name, output.getvalue())
+    output.close()
