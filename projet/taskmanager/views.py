@@ -304,6 +304,15 @@ def edittask_view(request, task_id):
             form = TaskForm(project, instance=task)
     return render(request, "newtask.html", locals())
 
+
+@login_required()
+def my_profile(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "myprofile.html", locals())
+
+
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):
     if request.method == 'POST':
