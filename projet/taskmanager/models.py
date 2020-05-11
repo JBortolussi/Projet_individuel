@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.contrib import admin
@@ -7,7 +9,6 @@ from django.dispatch import receiver
 from django.db.models.signals import  m2m_changed, pre_delete
 from django.utils import timezone
 
-# Create your models here.
 
 class ProjetAdmin(admin.ModelAdmin):
     # configuration vue projet dans Admin
@@ -29,15 +30,21 @@ class Projet(models.Model):
     def __str__(self):
         return self.name
 
+    def natural_key(self):
+        return self.name
+
 
 class Status(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
 
     class Meta:
         verbose_name = "Status"
         verbose_name_plural = "Status"
 
     def __str__(self):
+        return self.name
+
+    def natural_key(self):
         return self.name
 
 
@@ -63,12 +70,12 @@ class TaskAdmin(admin.ModelAdmin):
 class Task(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
     projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True, blank=True)
-    description = models.TextField()
+    description = models.TextField(null=True, blank=True)
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    start_date = models.DateField(verbose_name="Date de début")
-    due_date = models.DateField(verbose_name="Date de fin")
-    priority = models.IntegerField()
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    start_date = models.DateField(default=date.today, verbose_name="Date de début")
+    due_date = models.DateField(default=date.today, verbose_name="Date de fin")
+    priority = models.IntegerField(default=1, help_text="Between 1 and 10")
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, default=1)
 
     def __str__(self):
         return self.name
@@ -79,12 +86,18 @@ class Task(models.Model):
         if self.assignee not in self.projet.members.all():
             raise ValidationError("Il faut que la perssonne à qui on assigne la tâche soit membre du projet")
 
+    def natural_key(self):
+        return self.name
+
 
 class Journal(models.Model):
     date = models.DateTimeField(default=timezone.now, verbose_name="Date de parution", blank=True)
-    entry = models.CharField(max_length=160)
+    entry = models.CharField(max_length=240)
     author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     task = models.ForeignKey('Task', on_delete=models.CASCADE, null=True, blank=True)
+
+    def natural_key(self):
+        return self.name
 
 
 class JournalAdmin(admin.ModelAdmin):
