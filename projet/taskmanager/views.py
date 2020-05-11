@@ -1,71 +1,18 @@
+import datetime
+
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import ProjectForm, JournalForm, TaskForm
 from django.contrib.auth import authenticate, login, logout
-from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from .models import Projet, Task, Journal
-
-
-# REPLACED BY GENERIC VIEWS
-# def connexion(request):
-#     """View for the connexion page
-#
-#     This view handel the treatment the the connexion form.
-#     If the log in process is successful, redirect the user to the project list page
-#
-#     :param request: the request data, include the form data if an user tried to logged in
-#     :return: Either the connexion HttpResponse or the redirection to the project list page if the user logged in
-#     """
-#
-#     # If true an error will be displayed
-#     error = False
-#
-#     # No need to use connexion method if already logged in
-#     if request.user.is_authenticated:
-#         return redirect("projects")
-#
-#     # Someone try to connected and had sent a form
-#     if request.method == "POST":
-#
-#         # retrieve the user's data
-#         form = ConnexionForm(request.POST)
-#         if form.is_valid():
-#             username = form.cleaned_data["username"]
-#             password = form.cleaned_data["password"]
-#
-#             # Test if the user can be log in
-#             user = authenticate(username=username, password=password)
-#             # Success
-#             if user:
-#                 # Actually log the user in
-#                 login(request, user)
-#                 return redirect("projects")
-#             # Failure
-#             else:
-#                 error = True
-#     # A new user open the connexion view
-#     else:
-#         form = ConnexionForm()
-#
-#     return render(request, 'connexion.html', locals())
-#
-#
-# def deconnexion(request):
-#     """Handel the log out process
-#
-#     :param request: the request data, shall include the logged user's data (no error if not)
-#     :return: Redirect to the connexion page
-#     """
-#     logout(request)
-#     return HttpResponseRedirect(reverse(connexion))
+from .models import Projet, Task, Journal, Status
 
 
 @login_required()
-def redir(request):
+def redir():
     return redirect('projects')
 
 
@@ -259,6 +206,9 @@ def task_view(request, task_id):
                 journal.task = task
                 journal.author = request.user
                 journal.save()
+
+                task.last_modification = datetime.datetime.now()
+                task.save()
         else:
             # initialize a new form
             form = JournalForm()
@@ -296,6 +246,8 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
+                task.last_modification = datetime.datetime.now()
+                task.save()
                 return redirect("task", task_id=task.id)
         else:
             # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
@@ -331,6 +283,7 @@ def edittask_view(request, task_id):
                 task = form.save(commit=False)
                 # Manually set the project id. Otherwise a new task would be created
                 task.id = task_id
+                task.last_modification = datetime.datetime.now()
                 task.save()
                 return redirect("task", task_id=task.id)
         else:
@@ -339,6 +292,55 @@ def edittask_view(request, task_id):
     else:
         return redirect("projects")
     return render(request, "newtask.html", locals())
+
+
+@login_required()
+def my_profile(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "myprofile.html", locals())
+
+
+@login_required()
+def taches_assignees(request):
+
+    tasks = Task.objects.filter(assignee=request.user).exclude(status__name__contains="Finished")
+
+    return render(request, "tachesassignees.html", locals())
+
+
+@login_required()
+def taches_terminees(request):
+
+    tasks = Task.objects.filter(assignee=request.user, status__name__contains="Finished")
+
+    return render(request, "tachesterminees.html", locals())
+
+
+@login_required()
+def taches_projets(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "tachesprojets.html", locals())
+
+@login_required()
+def taches_recents_home(request):
+
+    projects = request.user.projets.all()
+
+    return render(request, "tachesrecentshome.html", locals())
+
+
+@login_required()
+def taches_recents(request, project_id):
+
+    project = get_object_or_404(Projet, id=project_id)
+    tasks = project.task_set.order_by('-last_modification')
+
+    return render(request, "tachesrecents.html", locals())
+
 
 # Sign up page is the only view which doesn't require a log in for obvious reasons
 def signup(request):
