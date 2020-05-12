@@ -388,8 +388,11 @@ def data_selection(request):
 
 
 @login_required()
-def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, exp_j=False, exp_s=False):
+def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, exp_j=False, exp_s=False,
+                  querysets=None):
     """ This view generates a zip file containing all the data required by the user.
+    I tried to write a function as general as possible: it can either export all the data or some of the data
+    that the AUTHENTICATED USER has access to, or export a general QUERYSET made by instances of the model of this app
 
     :param request:
     :param file_format: among .csv, .json, .xml, .xls (MS-Excel)
@@ -397,6 +400,8 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
                                                 projects tasks, tasks journals or status models
                                                 (a particular USER can export ONLY the data of the projects of which he/
                                                 she is a member)
+
+    :param querysets: a list of queryset (can be passed from whatever view to export the data)
 
     : return: the zip file containing the data
     """
@@ -556,6 +561,11 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
         dump_to_file_format(journals_queryset, file_format, data_zip)
     if exp_s:
         dump_to_file_format(status_queryset, file_format, data_zip)
+
+    # it is also possible to pass whatever list of querysets to this function
+    if not querysets is None:
+        for queryset in querysets:
+            dump_to_file_format(queryset, file_format, data_zip)
 
     # closes the zip file
     data_zip.close()
