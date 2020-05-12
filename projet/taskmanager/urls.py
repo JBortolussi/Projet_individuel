@@ -20,7 +20,5 @@ urlpatterns = [
     path('myprofile/4', views.taches_projets, name="taches_projets"),
     path('myprofile/5', views.taches_recents_home, name="taches_recents_home"),
     path('myprofile/5/<int:project_id>', views.taches_recents, name="taches_recents"),
-    path('data-selection', views.data_selection, name="select-data"),
-    path('data-download/<str:file_format>/<int:exp_u>/<int:exp_p>/<int:exp_t>/<int:exp_j>/<int:exp_s>',
-         views.download_data, name="export-data"),
+    path('export-data-selection', views.data_selection, name="select-data"),
 ]

@@ -115,8 +115,8 @@ class TaskForm(forms.ModelForm):
 
 
 class ExportDataForm(forms.Form):
-    user = forms.BooleanField(required=False)
     projects = forms.BooleanField(required=False)
+    projects_members = forms.BooleanField(required=False)
     tasks = forms.BooleanField(required=False)
     journals = forms.BooleanField(required=False)
     status = forms.BooleanField(required=False)

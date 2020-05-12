@@ -55,6 +55,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'select-data' %}">Export data</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'admin:index' %}">Administration</a>
+                    </li>
                     {# Logout button #}
                     <li class="nav-item">
                         <a href="{% url "logout" %}" class="btn btn-danger d-none d-inline-block ml-md-2">
@@ -93,7 +96,7 @@
         {% endfor %}
     {% endif %}
 
-    {# BLOCK NAVIGATION #}
+    {# BLOCK BREADCRUMBS (see bootstrap breadcrums) #}
     {# to be updated #}
     {% block to_remove_path %}
         <div style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
