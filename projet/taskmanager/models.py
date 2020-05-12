@@ -7,7 +7,7 @@ from django.db import models
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
-from django.db.models.signals import  m2m_changed, pre_delete
+from django.db.models.signals import m2m_changed, pre_delete
 
 
 class Projet(models.Model):
@@ -24,7 +24,7 @@ class Projet(models.Model):
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=30, unique=True) # not possible to duplicate a status
+    name = models.CharField(max_length=30, unique=True)  # not possible to duplicate a status
 
     class Meta:
         verbose_name = "Status"
@@ -39,7 +39,7 @@ class Status(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
-    projet = models.ForeignKey("Projet", on_delete=models.CASCADE)
+    projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True)
     description = models.TextField(null=True, blank=True)
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     start_date = models.DateField(default=date.today, verbose_name="Date de début")
@@ -53,7 +53,7 @@ class Task(models.Model):
         return self.name
 
     def clean(self):
-        if self.projet == None:
+        if self.projet is None:
             return
         if self.assignee not in self.projet.members.all():
             raise ValidationError("Il faut que la perssonne à qui on assigne la tâche soit membre du projet")

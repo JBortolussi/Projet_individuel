@@ -1,128 +1,132 @@
 {% extends "base.html" %}
-{% block title %} {{task.name}} {% endblock %}
+
+{% block title %}- {{ task.name }} {% endblock %}
+
 {% block line_path %}
-    <a class="custom_link" href="{% url "projects" %}"> Projets </a>
-    /
-    <a class="custom_link" href="{% url "project" project.id %}"> {{project.name}} </a>
-    /
-    <a class="custom_link" href="{% url "task" task.id%}"> {{task.name}} </a>
+    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projets</a></li>
+    <li class="breadcrumb-item"><a href="{% url "project" project.id %}">{{ project.name }}</a></li>
+    <li class="breadcrumb-item active"><a href="{% url "task" task.id %}">{{ task.name }}</a></li>
 {% endblock %}
 
 {% block page %}
-<br>
 
-<h1 style="display: inline">{{project.name}}</h1>
-{# Display the edit button #}
-<a class="custom_link" href="{% url "edittask" task.id%}">
-    <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x" style="float: right;color: dodgerblue;"></i>
-</a>
-<h3>{{task.name}}</h3>
+    <h1 style="display: inline">{{ project.name }}</h1>
+    {# Display the edit button #}
+    <a class="custom_link" href="{% url "edittask" task.id %}">
+        <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x"
+           style="float: right;color: dodgerblue;"></i>
+    </a>
+    <h3>{{ task.name }}</h3>
 
 
-<div class="container-fluid" style="margin-top: 1%">
-{{task.description}}
-<table class="table">
-    <tbody>
-        <tr>
-            <td><B>Assignee</B></td>
-            {% if task.assignee == None %}
+    <div class="container-fluid" style="margin-top: 1%">
+        {{ task.description }}
+        <table class="table">
+            <tbody>
+            <tr>
+                <td><B>Assignee</B></td>
+                {% if task.assignee == None %}
                     <td><span class="badge badge-danger">Personne</span></td>
-            {% else %}
-                {% if not task.assignee.last_name %}
-                    <td><span class="badge badge-primary">{{task.assignee.username}}</span></td>
                 {% else %}
-                    <td><span class="badge badge-primary">{{task.assignee.first_name}} {{task.assignee.last_name}}</span></td>
+                    {% if not task.assignee.last_name %}
+                        <td><span class="badge badge-primary">{{ task.assignee.username }}</span></td>
+                    {% else %}
+                        <td><span
+                                class="badge badge-primary">{{ task.assignee.first_name }} {{ task.assignee.last_name }}</span>
+                        </td>
+                    {% endif %}
                 {% endif %}
-            {% endif %}
-        </tr>
-        <tr>
-            <td><B>Start date</B></td>
-            <td>{{task.start_date}}</td>
-        </tr>
-        <tr>
-            <td><B>Due date</B></td>
-            <td>{{task.due_date}}</td>
-        </tr>
-        <tr>
-            <td><B>Status</B></td>
-            <td><span class="badge badge-warning">{{task.status.name}}</span></td>
-        </tr>
-        <tr>
-            <td><B>Latest Modification</B></td>
-            <td><span class="badge badge-warning">{{task.last_modification}}</span></td>
-        </tr>
-    </tbody>
-</table>
-<h6>History</h6>
-{# Display all the entries #}
-<table class="table">
-    <tbody>
-    {% for entry in entries %}
-        <tr>
-            <td style="width: 50%">
-                {% if not entry.author.last_name %}
-                    <span class="badge badge-primary">{{entry.author.username}}</span>
-                {% else %}
-                    <span class="badge badge-primary">{{entry.author.first_name}} {{entry.author.last_name}}</span>
-                {% endif %}
-                {{entry.date}}
-            </td>
-            <td style="width: 50%">
-                {{entry.entry}}
-            </td>
-        </tr>
-    {% endfor %}
-    </tbody>
-</table>
-    {# Journal form section #}
-    {# To be active mean to be hidden #}
-    {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
-    <i  id="CA" data-toggle="tooltip" data-placement="left" title="Ajouter une information" class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
-    {# CB is initially hidden. Will be displayed when the first button will clicked #}
-    <div id="CB" class="row active">
-        <div class="col-sm-1">
-            {# The second button. When clicked it will be hidden and the first button will be displayed again #}
-            <i id="IB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x" style="display: inline;color: tomato;"></i>
-        </div>
-        <div class="col-sm-11">
-            {# The Journal form #}
-            <form method="post" action="{% url "task" task.id %}">
-                {% csrf_token %}
-                <div class="row">
-                    <div style="float: left">
-                        <button type="submit" class="btn btn-primary" style="display: inline">Envoyer</button>
-                    </div>
-                    <div style="flex-grow: 1">
-                        <div class="form-group" style="flex-grow: 1;">
-                           {{form.entry}}
+            </tr>
+            <tr>
+                <td><B>Start date</B></td>
+                <td>{{ task.start_date }}</td>
+            </tr>
+            <tr>
+                <td><B>Due date</B></td>
+                <td>{{ task.due_date }}</td>
+            </tr>
+            <tr>
+                <td><B>Status</B></td>
+                <td><span class="badge badge-warning">{{ task.status.name }}</span></td>
+            </tr>
+            <tr>
+                <td><B>Latest Modification</B></td>
+                <td><span class="badge badge-warning">{{ task.last_modification }}</span></td>
+            </tr>
+            </tbody>
+        </table>
+        <h6>History</h6>
+        {# Display all the entries #}
+        <table class="table">
+            <tbody>
+            {% for entry in entries %}
+                <tr>
+                    <td style="width: 50%">
+                        {% if not entry.author.last_name %}
+                            <span class="badge badge-primary">{{ entry.author.username }}</span>
+                        {% else %}
+                            <span class="badge badge-primary">{{ entry.author.first_name }} {{ entry.author.last_name }}</span>
+                        {% endif %}
+                        {{ entry.date }}
+                    </td>
+                    <td style="width: 50%">
+                        {{ entry.entry }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        {# Journal form section #}
+        {# To be active mean to be hidden #}
+        {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
+        <i id="CA" data-toggle="tooltip" data-placement="left" title="Ajouter une information"
+           class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
+        {# CB is initially hidden. Will be displayed when the first button will clicked #}
+        <div id="CB" class="row active">
+            <div class="col-sm-1">
+                {# The second button. When clicked it will be hidden and the first button will be displayed again #}
+                <i id="IB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x"
+                   style="display: inline;color: tomato;"></i>
+            </div>
+            <div class="col-sm-11">
+                {# The Journal form #}
+                <form method="post" action="{% url "task" task.id %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div style="float: left">
+                            <button type="submit" class="btn btn-primary" style="display: inline">Envoyer</button>
+                        </div>
+                        <div style="flex-grow: 1">
+                            <div class="form-group" style="flex-grow: 1;">
+                                {{ form.entry }}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 
-{# This code implement the buttons which display/hide the journal form #}
+    {# This code implement the buttons which display/hide the journal form #}
 {% endblock %}
 {% block scriptBase %}
-<!--<script>-->
+    <!--<script>-->
     let CA=document.getElementById("CA");
     let IB=document.getElementById("IB");
     let CB=document.getElementById("CB");
 
     function toggA(){
-        CB.classList.toggle("active");
-        CA.classList.toggle("active");
+    CB.classList.toggle("active");
+    CA.classList.toggle("active");
     };
     CA.onclick=toggA;
 
     function toggB(){
-        CA.classList.toggle("active");
-        CB.classList.toggle("active");
+    CA.classList.toggle("active");
+    CB.classList.toggle("active");
     };
     IB.onclick=toggB;
 
-<!--//</script>-->
+    <!--//</script>-->
 
 {% endblock %}

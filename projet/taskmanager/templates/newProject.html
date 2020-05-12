@@ -1,44 +1,50 @@
 {% extends "base.html" %}
-{% block title %} Nouveau Projet {% endblock %}
-{% block line_path %}
-    <a class="custom_link" href="{% url "projects" %}"> Projets </a>
-    /
-    {% if is_new %}
-        <a class="custom_link" href="{% url "new_project" %}"> Nouveau Projet </a>
-    {% else %}
-        <a class="custom_link" href="{% url "edit_project" project.id %}" >Editer : {{project.name}}</a>
-    {% endif %}
 
+{% block title %}{% if project %}- {{ project.name }} {% else %}- Nouveau Projet {% endif %}{% endblock %}
+
+{% block line_path %}
+    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projets</a></li>
+    {% if is_new %}
+        <li class="breadcrumb-item active"><a href="{% url "new_project" %}">Nouveau Projet</a></li>
+    {% else %}
+        <li class="breadcrumb-item active"><a href="{% url "edit_project" project.id %}">Editer : {{ project.name }}</a>
+        </li>
+    {% endif %}
 {% endblock %}
 
 {% block page %}
-<br>
-<h1 style="display: inline">Nouveau Projet</h1>
-
-<!--Button to the project list display page-->
-<a class="custom_link" href="{% url "projects" %}">
-    <i data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fas fa-backspace fa-3x" style="float: right;color: tomato;"></i>
-</a>
-
-<div class="container-fluid" style="margin-top: 1%">
-    <!--Test if the user want to creat creat a new project or edit an already existing one-->
-    {% if is_new %}
-        <!--Link the form to the project creation path-->
-        <form method="post" action={% url "new_project" %}>
+    {% if project %}
+        <h3 style="display: inline">{{ project }}</h3>
     {% else %}
-        <!--Link the view to the project edition path-->
-        <form method="post" action={% url "edit_project" project.id %}>
+        <h3 style="display: inline">Nouveau Projet</h3>
     {% endif %}
+
+    <!--Button to the project list display page-->
+    <a class="custom_link" href="{% url "projects" %}">
+        <i data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fas fa-backspace fa-3x"
+           style="float: right;color: tomato;"></i>
+    </a>
+
+    <div class="container-fluid mt-5" style="margin-top: 1%">
+        <!--Test if the user want to creat creat a new project or edit an already existing one-->
+        {% if is_new %}
+            <!--Link the form to the project creation path-->
+            <form method="post" action={% url "new_project" %}>
+        {% else %}
+            <!--Link the view to the project edition path-->
+            <form method="post" action={% url "edit_project" project.id %}>
+        {% endif %}
         {% csrf_token %}
 
         <!--Display the project's name field-->
         <div class="row">
             <div class="col-sm-2">
-                {{form.name.label}}
+                {{ form.name.label }}
             </div>
             <div class="col-sm-10">
                 <div class="form-group" style="flex-grow: 1;">
-                   {{form.name}}
+                    {{ form.name.errors }}
+                    {{ form.name }}
                 </div>
             </div>
         </div>
@@ -46,16 +52,22 @@
         <!--Display the project's members field-->
         <div class="row">
             <div class="col-sm-2">
-                {{form.members.label}}
+                {{ form.members.label }}
             </div>
             <div class="col-sm-10">
                 <div class="form-group" style="flex-grow: 1;">
-                   {{form.members}}
+                    {{ form.members.errors }}
+                    {{ form.members }}
                 </div>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
+        <div class="row">
+            <button type="submit" class="btn btn-success mx-auto">
+                <i class="fa fa-save align-middle" aria-hidden="true"></i>
+                <span class="align-middle">Enregistrer</span>
+            </button>
+        </div>
+        </form>
 
-</div>
+    </div>
 {% endblock %}

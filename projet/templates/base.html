@@ -97,26 +97,24 @@
     {% endif %}
 
     {# BLOCK BREADCRUMBS (see bootstrap breadcrums) #}
-    {# to be updated #}
     {% block to_remove_path %}
-        <div style="background-color: #eaeaea;display: block;float: left;border-radius: 5px;padding: 5px;padding-left: 1%;width: 100%">
-            {% block line_path %}{% endblock %}
-        </div>
-        <br>
+            <ol class="breadcrumb">
+                {% block line_path %}{% endblock %}
+            </ol>
     {% endblock %}
 
-    <!--Main block of the page-->
-    {% block page %} Nothing to be displayed {% endblock %}
-    <div style="font-size: 15px">
-        <hr size="1" color="grey">
-    </div>
+<!--Main block of the page-->
+{% block page %} Nothing to be displayed {% endblock %}
 
-    {# FOOTER #}
-    <footer class="py-5 bg-dark">
-        <div class="container">
-            <p class="m-0 text-center text-white">Copyright &copy; 2020 ISAE-SUPAERO</p>
-        </div>
-    </footer>
+{# FOOTER #}
+<div style="font-size: 15px">
+    <hr size="1" color="grey">
+</div>
+<footer class="py-5 bg-light">
+    <div class="container">
+        <p class="m-0 text-center">Copyright &copy; 2020 ISAE-SUPAERO</p>
+    </div>
+</footer>
 </div>
 
 

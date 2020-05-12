@@ -370,10 +370,8 @@ def data_selection(request):
     This view contains a form that allows the user to select the data to export. After that the form has caught the
     user choices, it calls the function (or view) 'download_data' defined below
     """
-
-    # get because I do not want to upload data into the database
-    if request.method == 'GET':
-        form = ExportDataForm(request.GET)
+    if request.method == 'POST':
+        form = ExportDataForm(request.POST)
         if form.is_valid():
             # parameteres passed to 'download_data'
             file_format = form.cleaned_data['file_format']

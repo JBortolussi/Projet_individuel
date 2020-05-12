@@ -104,6 +104,7 @@ class TaskForm(forms.ModelForm):
         self.fields['priority'].initial = 1
         self.fields['completion_percentage'].widget.attrs.update({'class': 'form-control'})
         self.fields['completion_percentage'].initial = 1
+        self.fields['completion_percentage'].label = "Pourcentage d'avancement"
         # This field is only used in order to set up the project field with the project.
         # Shall not be modified by the user
         self.fields['projet'].widget.attrs.update({'style': 'display: none'})
@@ -166,6 +167,10 @@ class ExportDataForm(forms.Form):
 
     # check if at least one tick has been put
     def clean(self):
-        if self.cleaned_data['projects'] or self.cleaned_data['projects_members'] or self.cleaned_data['tasks'] or \
-                self.cleaned_data['journals'] or self.cleaned_data['status']:
-            raise ValidationError("Tick at least one")
+        p = self.cleaned_data['projects']
+        t = self.cleaned_data['tasks']
+        pm = self.cleaned_data['projects_members']
+        s = self.cleaned_data['status']
+        j = self.cleaned_data['journals']
+        if not (p or t or pm or s or j):
+            raise ValidationError("Put at least a tick")

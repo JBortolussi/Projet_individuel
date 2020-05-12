@@ -1,9 +1,44 @@
 {% extends "base.html" %}
+{% load crispy_forms_filters %}
+
+{% block title %}- Export data{% endblock %}
+
+{% block to_remove_path %}{% endblock %}
 
 {% block page %}
-    <form method="GET">
+    <h3>Export your data</h3>
+
+    <form class="mt-5" method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Download</button>
+        {{ form.non_field_errors }}
+        <div class="form-row mx-auto">
+            <div class="form-group col-md-1 mb-0">
+                {{ form.projects|as_crispy_field }}
+                {{ form.projects.errors|as_crispy_errors }}
+            </div>
+            <div class="form-group col-md-2 mb-0">
+                {{ form.projects_members|as_crispy_field }}
+                {{ form.projects_members.errors|as_crispy_errors }}
+            </div>
+            <div class="form-group col-md-1 mb-0">
+                {{ form.tasks|as_crispy_field }}
+                {{ form.tasks.errors|as_crispy_errors }}
+            </div>
+            <div class="form-group col-md-1 mb-0">
+                {{ form.journals|as_crispy_field }}
+                {{ form.journals.errors|as_crispy_errors }}
+            </div>
+            <div class="form-group col-md-1 mb-0">
+                {{ form.status|as_crispy_field }}
+                {{ form.status.errors|as_crispy_errors }}
+            </div>
+            <div class="form-group col-md-3 mb-0">
+                {{ form.file_format|as_crispy_field }}
+            </div>
+            <button type="submit" class="btn btn-warning mx-auto" style="height: 50%">
+                <i class="fa fa-download align-middle" aria-hidden="true"></i>
+                <span class="align-middle">Download</span>
+            </button>
+        </div>
     </form>
 {% endblock %}
