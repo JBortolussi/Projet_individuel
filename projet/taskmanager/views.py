@@ -193,7 +193,6 @@ def project_view(request, project_id):
     project = get_object_or_404(Projet, id=project_id)
 
     if request.method == 'GET':
-        print(request.GET)
 
         filters = Q()
 

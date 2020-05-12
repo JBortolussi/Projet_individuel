@@ -115,7 +115,9 @@
 <script>
     // script that allow bootstratp tooltip to work properly
     $(document).ready(function () {
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip({
+    trigger : 'hover'
+  });
     });
     // Allow following templates to have their own scripts.
     // Be aware that the script tags are no more required in this block.

@@ -7,25 +7,14 @@ let filter_on = new Boolean(false);
 let input_number = 0;
 
 function remove_input(id) {
-    // let input = document.getElementById("filter-sel-" + id);
-    // let text = document.getElementById("filter-txt-" + id);
-    // let button = document.getElementById("filter-del-" + id);
-    // let br = document.getElementById("filter-br-" + id);
-    //
-    // let parent = input.parentNode;
-    // parent.removeChild(input);
-    // parent.removeChild(text);
-    // parent.removeChild(button);
-    // parent.removeChild(br);
-
     let row = document.getElementById("filter-row-" + id);
+    $("#filter-del-" + id).tooltip('dispose');
     let parent = row.parentNode;
     parent.removeChild(row);
 }
 
 function new_select_filter(id) {
     let input = document.createElement("SELECT");
-    input.setAttribute('id', "filter-sel-" + id);
     input.setAttribute('class', 'form-control');
 
 
@@ -75,7 +64,6 @@ function new_select_filter(id) {
 function new_select_link(id) {
     let select = document.createElement('SELECt');
     select.setAttribute('class', 'form-control');
-    select.setAttribute('id', 'filter-link-' + id);
 
     let and = document.createElement('OPTION');
     and.setAttribute('value', 'and');
@@ -91,11 +79,10 @@ function new_select_link(id) {
 }
 
 let text_dic = {};
-function add_input(text_value="", select_value="assign") {
+function add_input() {
     input_number += 1;
 
     let select = new_select_filter(input_number);
-    select.value = select_value;
     select.setAttribute('name', input_number);
 
     let link = new_select_link(input_number);
@@ -106,7 +93,6 @@ function add_input(text_value="", select_value="assign") {
     text_text.setAttribute('type', 'text');
     text_text.setAttribute('name', input_number);
     text_text.setAttribute('class', 'form-control');
-    text_text.value = text_value;
 
     let text_user = document.createElement("SELECT");
     text_user.setAttribute('name', input_number);
@@ -117,7 +103,6 @@ function add_input(text_value="", select_value="assign") {
         opt.appendChild(document.createTextNode(user_tab[i][0]));
         text_user.appendChild(opt);
     }
-    text_user.value = text_value;
 
     let text_status = document.createElement("SELECT");
     text_status.setAttribute('name', input_number);
@@ -128,20 +113,18 @@ function add_input(text_value="", select_value="assign") {
         opt.appendChild(document.createTextNode(status_tab[i][0]));
         text_status.appendChild(opt);
     }
-    text_status.value = text_value;
 
     let text_date = document.createElement("INPUT");
     text_date.setAttribute('name', input_number);
     text_date.setAttribute('type', 'date');
     text_date.setAttribute('class', 'form-control');
-    text_date.value = text_value;
 
     text_dic['' + input_number] = [text_text, text_user, text_status, text_date];
 
     select.addEventListener("change",function() {
-        id = this.name;
+        let id = this.name;
         col2 = document.getElementById("col2-" + id);
-        child = col2.firstChild;
+        let child = col2.firstChild;
         col2.removeChild(child);
 
         if (this.value == "assign" || this.value == "not_assign"){
@@ -160,8 +143,6 @@ function add_input(text_value="", select_value="assign") {
     del.setAttribute('title', 'Remove filter');
     del.setAttribute('class', "fas fa-times fa-2x");
     del.style.color = 'tomato';
-    // del.setAttribute('type', "button");
-    // del.setAttribute('value', 'remove');
     del.setAttribute('onclick', "remove_input(" + input_number + ")");
 
     let col1 = document.createElement('DIV');
@@ -192,6 +173,7 @@ function add_input(text_value="", select_value="assign") {
     row.appendChild(col4);
 
     filter_div.appendChild(row);
+    $("#filter-del-" + input_number).tooltip();
 }
 
 
