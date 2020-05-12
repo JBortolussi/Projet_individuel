@@ -1,27 +1,13 @@
+# python modules
 from datetime import date
 
+# django modules
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-from django.contrib import admin
 from django.contrib.auth.models import User, Group, Permission
 from django.core.exceptions import ValidationError
 from django.dispatch import receiver
 from django.db.models.signals import  m2m_changed, pre_delete
-from django.utils import timezone
-
-# Create your models here.
-
-class ProjetAdmin(admin.ModelAdmin):
-    # configuration vue projet dans Admin
-    list_display = ('name',)
-    list_filter = ('name',)
-    ordering = ('name',)
-    search_fields = ('name',)
-
-    # Ensure that the prject has at least one member
-    def clean(self):
-        if not self.members:
-            raise ValidationError("Un projet doit avoir au moins un membre")
 
 
 class Projet(models.Model):
@@ -31,12 +17,14 @@ class Projet(models.Model):
     def __str__(self):
         return self.name
 
+    # this is used to make the django json and xml serializer write the primary key natural value (the name of the
+    # project) instead of the ID number
     def natural_key(self):
         return self.name
 
 
 class Status(models.Model):
-    name = models.CharField(max_length=100, unique=True)
+    name = models.CharField(max_length=30, unique=True) # not possible to duplicate a status
 
     class Meta:
         verbose_name = "Status"
@@ -49,35 +37,17 @@ class Status(models.Model):
         return self.name
 
 
-class TaskAdmin(admin.ModelAdmin):
-    list_display = ('name', 'projet', 'apercu_description', 'assignee', 'start_date', 'due_date', 'priority', 'status',)
-    list_filter = ('projet', 'name', 'start_date', 'due_date', 'priority', 'status',)
-    date_hierarchy = 'start_date'
-    ordering = ('start_date',)
-    search_fields = ('name', 'status',)
-
-    def apercu_description(self, task):
-        """
-        Retourne les 40 premiers caractères de la description. S'il
-        y a plus de 40 caractères, il faut rajouter des points de suspension.
-        """
-        text = task.description[0:40]
-        if len(task.description) > 40:
-            return '%s…' % text
-        else:
-            return text
-
-
 class Task(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
-    projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True, blank=True)
+    projet = models.ForeignKey("Projet", on_delete=models.CASCADE)
     description = models.TextField(null=True, blank=True)
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    start_date = models.DateField(verbose_name="Date de début")
-    due_date = models.DateField(verbose_name="Date de fin")
-    priority = models.IntegerField()
+    start_date = models.DateField(default=date.today, verbose_name="Date de début")
+    due_date = models.DateField(default=date.today, verbose_name="Date de fin")
+    priority = models.SmallIntegerField(default=1, help_text="Entre 1 et 10")
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
-    last_modification = models.TimeField(null=True, blank=True)
+    last_modification = models.DateTimeField(auto_now_add=True)
+    completion_percentage = models.SmallIntegerField(default=0)
 
     def __str__(self):
         return self.name
@@ -93,38 +63,21 @@ class Task(models.Model):
 
 
 class Journal(models.Model):
-    date = models.DateTimeField(default=timezone.now, verbose_name="Date de parution", blank=True)
+    # date and time fixed at the moment of the creation
+    date = models.DateTimeField(auto_now_add=True, verbose_name="Date de parution")
     entry = models.CharField(max_length=240)
-    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-    task = models.ForeignKey('Task', on_delete=models.CASCADE, null=True, blank=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    task = models.ForeignKey('Task', on_delete=models.CASCADE)
 
     def natural_key(self):
         return self.name
-
-
-class JournalAdmin(admin.ModelAdmin):
-    list_display = ('author', 'date', 'apercu_entry', 'task',)
-    list_filter = ('author', 'date',)
-    date_hierarchy = 'date'
-    ordering = ('date',)
-
-    def apercu_entry(self, journal):
-        """
-        Retourne les 40 premiers caractères de la description. S'il
-        y a plus de 40 caractères, il faut rajouter des points de suspension.
-        """
-        text = journal.entry[0:40]
-        if len(journal.entry) > 40:
-            return '%s…' % text
-        else:
-            return text
 
 
 @receiver(m2m_changed, sender=Projet.members.through)
 def update_tasks_assignment(sender, **kwargs):
     """
     This function is called whenever the project members field of a project is modified.
-    His scope is to make sure that a task is not assign to someone who is no more member of the project
+    His scope is to make sure that a task is not assigned to someone who is no more member of the project
 
     :param sender:
     :param kwargs:

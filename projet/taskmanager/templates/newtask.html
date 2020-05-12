@@ -1,110 +1,37 @@
 {% extends "base.html" %}
-{% block title %} {{task.name}} {% endblock %}
+{% load crispy_forms_filters %}
+
+{% block title %} {{ task.name }} {% endblock %}
 {% block line_path %}
     <a class="custom_link" href="{% url "projects" %}"> Projets </a>
     /
-    <a class="custom_link" href="{% url "project" project.id %}"> {{project.name}} </a>
+    <a class="custom_link" href="{% url "project" project.id %}"> {{ project.name }} </a>
     /
     {% if is_new %}
-        <a class="custom_link" href="{% url "newtask" project.id%}"> Nouvelle tache </a>
+        <a class="custom_link" href="{% url "newtask" project.id %}"> Nouvelle tache </a>
     {% else %}
-        <a class="custom_link" href="{% url "edittask" task.id%}"> Editer une tache </a>
+        <a class="custom_link" href="{% url "edittask" task.id %}"> Editer une tache </a>
     {% endif %}
 {% endblock %}
 
 {% block page %}
-<br>
+    <br>
 
-<h1 style="display: inline">{{project.name}}</h1>
-<a class="custom_link" href="{% url "project" project.id%}">
-    <i data-toggle="tooltip" data-placement="left" title="Retour au projet" class="fas fa-backspace fa-3x" style="float: right;color: tomato;"></i>
-</a>
-<h3>{{task.name}}</h3>
-{% if is_new %}
-<form method="post" action="{% url "newtask" project.id %}" >
-{% else %}
-<form method="post" action="{% url "edittask" task.id %}" >
-{% endif %}
-    {% csrf_token %}
-    {{form.projet}}
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.name.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.name}}
-            </div>
-        </div>
-    </div>
+    <h1 style="display: inline">{{ project.name }}</h1>
+    <a class="custom_link" href="{% url "project" project.id %}">
+        <i data-toggle="tooltip" data-placement="left" title="Retour au projet" class="fas fa-backspace fa-3x"
+           style="float: right;color: tomato;"></i>
+    </a>
+    <h3>{{ task.name }}</h3>
+    {% if is_new %}
+        <form method="post" action="{% url "newtask" project.id %}">
+    {% else %}
+        <form method="post" action="{% url "edittask" task.id %}">
+    {% endif %}
+{% csrf_token %}
+{{ form|crispy }}
 
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.description.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.description}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.assignee.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.assignee}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.start_date.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.start_date}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.due_date.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.due_date}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.status.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.status}}
-            </div>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="col-sm-2">
-            {{form.priority.label}}
-        </div>
-        <div class="col-sm-10">
-            <div class="form-group" style="flex-grow: 1;">
-               {{form.priority}}
-            </div>
-        </div>
-    </div>
-    <button type="submit" class="btn btn-primary" style="display: inline;">Creer</button>
-<!--{{form.as_p}}-->
+<button type="submit" class="btn btn-primary" style="display: inline;">Creer</button>
 </form>
 
 {% endblock %}}

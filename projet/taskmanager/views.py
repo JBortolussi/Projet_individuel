@@ -1,25 +1,29 @@
+# python modules
 import csv
 import datetime
 import io
-
 import xlwt
-from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django.core import serializers
 from zipfile import ZipFile
 
+# django modules and functions
+from django.contrib import messages
+from django.core import serializers
 from django.http import HttpResponse
-from django.shortcuts import render, HttpResponseRedirect, redirect, get_object_or_404
-from .forms import ProjectForm, JournalForm, TaskForm, ExportDataForm
-from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import ProjectForm, JournalForm, TaskForm
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
+
+# models
+from django.contrib.auth.models import User
+from django.db.models import Q
 from .models import Projet, Task, Journal, Status
 
+# forms
+from django.contrib.auth.forms import UserCreationForm
+from .forms import ProjectForm, JournalForm, TaskForm, ExportDataForm
 
+
+# redirect to the projects list page if the url requested is just http://localhost:8000/
 @login_required()
 def redir(request):
     return redirect('projects')
@@ -27,10 +31,10 @@ def redir(request):
 
 @login_required()
 def projects_view(request):
-    """The for the project list display page"""
+    """The view for the project list display page"""
 
-    # The projects to be displayed. Only ones in witch the logged in user is involved
-    projects = request.user.projets.all()
+    # The projects to be displayed. Only the ones in which the logged in user is involved
+    projects = request.user.projets.all().order_by('name')
     return render(request, 'projects.html', locals())
 
 
@@ -127,8 +131,6 @@ def edit_project_view(request, project_id):
     else:
         return redirect("projects")
 
-    return redirect("projects")
-
 
 @login_required()
 def project_view(request, project_id):
@@ -146,7 +148,6 @@ def project_view(request, project_id):
     project = get_object_or_404(Projet, id=project_id)
 
     if request.method == 'GET':
-        print(request.GET)
 
         filters = Q()
 
@@ -211,6 +212,7 @@ def task_view(request, task_id):
                 journal.author = request.user
                 journal.save()
 
+                # update the last modification DateTime of the Task instance
                 task.last_modification = datetime.datetime.now()
                 task.save()
         else:
@@ -250,7 +252,7 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
-                task.last_modification = datetime.datetime.now()
+                task.last_modification = datetime.datetime.now() # it's probably not necessary
                 task.save()
                 return redirect("task", task_id=task.id)
         else:

@@ -1,9 +1,12 @@
+# python modules
 from datetime import datetime
 
+# django modules
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import DateInput
 
+# models
 from .models import Projet, Journal, Task, Status
 
 
@@ -74,6 +77,8 @@ class JournalForm(forms.ModelForm):
 
         # Exclude all the fields except the entry. They will be set up using the local value in the corresponding view
         exclude = ('task', 'date', 'author')
+        widgets = {'entry': forms.TextInput(attrs={'cols': 10, 'placeholder': "Write here..."})
+                   }
 
 
 class TaskForm(forms.ModelForm):
@@ -97,6 +102,8 @@ class TaskForm(forms.ModelForm):
         self.fields['status'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].initial = 1
+        self.fields['completion_percentage'].widget.attrs.update({'class': 'form-control'})
+        self.fields['completion_percentage'].initial = 1
         # This field is only used in order to set up the project field with the project.
         # Shall not be modified by the user
         self.fields['projet'].widget.attrs.update({'style': 'display: none'})
@@ -113,8 +120,35 @@ class TaskForm(forms.ModelForm):
             'due_date': DateInput(format=('%Y-%m-%d'), attrs={'type': 'date'})
         }
 
+    # pour s'assurer que la priorité de la tache soit comprise entre 1 et 10
+    def clean_priority(self):
+        priority = self.cleaned_data['priority']
+        if priority < 1 or priority > 10:
+            raise ValidationError('Ensure this value is in the range.')
 
+        return priority  # Ne pas oublier de renvoyer le contenu du champ traité
+
+    # pour s'assurer que la due_date soit successive à la start_date
+    def clean_due_date(self):
+        start_date = self.cleaned_data['start_date']
+        due_date = self.cleaned_data['due_date']
+        if due_date < start_date:
+            raise ValidationError('The due date must be posterior to the start date.')
+
+        return due_date
+
+        # pour s'assurer que la priorité de la tache soit comprise entre 1 et 10
+    def clean_completion_percentage(self):
+        completion_percentage = self.cleaned_data['completion_percentage']
+        if completion_percentage < 0 or completion_percentage > 100:
+            raise ValidationError('Ensure this value is between 0 % and 100 %')
+
+        return completion_percentage
+
+
+# form used to select what models to export
 class ExportDataForm(forms.Form):
+    # 5 boolean fields to select the models
     projects = forms.BooleanField(required=False)
     projects_members = forms.BooleanField(required=False)
     tasks = forms.BooleanField(required=False)
@@ -127,4 +161,11 @@ class ExportDataForm(forms.Form):
         ('xml', 'xml'),
         ('xls', 'xls (MS Excel)'),
     ]
+    # select field to select among the 4 file formats above
     file_format = forms.ChoiceField(choices=FORMAT_FIELD_CHOICES)
+
+    # check if at least one tick has been put
+    def clean(self):
+        if self.cleaned_data['projects'] or self.cleaned_data['projects_members'] or self.cleaned_data['tasks'] or \
+                self.cleaned_data['journals'] or self.cleaned_data['status']:
+            raise ValidationError("Tick at least one")
