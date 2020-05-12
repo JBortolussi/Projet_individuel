@@ -2,6 +2,7 @@ import csv
 import datetime
 import io
 
+import xlwt
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
@@ -391,7 +392,7 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
     """ This view generates a zip file containing all the data required by the user.
 
     :param request:
-    :param file_format: among .csv, .json, .xml, MS Excel
+    :param file_format: among .csv, .json, .xml, .xls (MS-Excel)
     :param exp_t, exp_m, exp_t, exp_j, exp_s: booleans, allows to select wheter to export projects, projects members,
                                                 projects tasks, tasks journals or status models
                                                 (a particular USER can export ONLY the data of the projects of which he/
@@ -428,7 +429,12 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
 
         """
         # create a temporary  output stream (temp file)
-        output = io.StringIO()
+        if file_format == 'xls':
+            # it seems that an excel file needs to be written on a BytesIo even if on the xlwt they write exactly
+            # the opposite (I was about to become fool)
+            output = io.BytesIO()
+        else:
+            output = io.StringIO()
         # get queryset model
         model = queryset.model
         # the export code depends on the file format
@@ -483,6 +489,53 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
                 json_xml = serializers.serialize(file_format, queryset, use_natural_foreign_keys=True)
 
             output.write(json_xml)
+
+        elif file_format == 'xls':
+            wb = xlwt.Workbook(encoding='utf-8')  # create excel workbook
+            ws = wb.add_sheet(model._meta.model.__name__)  # create sheet
+
+            # Sheet header, first row
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+
+            '''This code is pretty similar to the code to export in .csv, but in excel each cell (row and column) 
+            must written separately'''
+            # get all the field names and write them as headers
+            # if User only confidential data
+            if model == User:
+                field_names = ['username', 'first_name', 'last_name', 'email']
+            else:
+                field_names = [field.name for field in model._meta.fields]
+            for col_num in range(len(field_names)):
+                ws.write(row_num, col_num, field_names[col_num].upper(), font_style)
+
+            # add a column for the members of the project
+            if model == Projet:
+                ws.write(row_num, col_num + 1, 'MEMBERS', font_style)
+
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+
+            # for each instance in the queryset
+            for obj in queryset:
+                row_num += 1
+                # for each field of the model
+                for col_num in range(len(field_names)):
+                    # get the field value
+                    field_value = getattr(obj, field_names[col_num])
+                    # this is to control the format of the date that will be written in the csv
+                    if isinstance(field_value, datetime.datetime):
+                        field_value = field_value.strftime("%m/%d/%Y, %H:%M:%S")
+                    ws.write(row_num, col_num, field_value.__str__(), font_style)
+
+                # add the column with the members of the project
+                if model == Projet:
+                    members = ', '.join([member.username for member in obj.members.all()])
+                    ws.write(row_num, col_num + 1, members, font_style)
+
+            # save the excel file on the output stream
+            wb.save(output)
 
         # generates the name of the output file depending on the model and the file format
         file_name = model._meta.model.__name__.lower() + '_data.' + file_format
