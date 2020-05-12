@@ -17,7 +17,6 @@ function new_select_filter(id) {
     let input = document.createElement("SELECT");
     input.setAttribute('class', 'form-control');
 
-
     let assign = document.createElement("OPTION");
     assign.setAttribute('value', 'assign');
     assign.appendChild(document.createTextNode('Assign to'));
@@ -79,8 +78,14 @@ function new_select_link(id) {
 }
 
 let text_dic = {};
-function add_input() {
+function add_input(id=-1) {
     input_number += 1;
+
+    if (id == -1){
+        div = filter_div;
+    } else {
+        div = document.getElementById('div-input-' + id);
+    }
 
     let select = new_select_filter(input_number);
     select.setAttribute('name', input_number);
@@ -172,11 +177,118 @@ function add_input() {
     row.appendChild(col3);
     row.appendChild(col4);
 
-    filter_div.appendChild(row);
+    div.appendChild(row);
     $("#filter-del-" + input_number).tooltip();
 }
 
+function remove_OR_AND(id) {
+    let row = document.getElementById("filter-row-" + id);
+    $("#filter-del-" + id).tooltip('dispose');
+    let parent = row.parentNode;
 
+    let div = document.getElementById("div-input-" + id);
+    let hr = document.getElementById("hr-" + id);
+
+    parent.removeChild(row);
+    parent.removeChild(div);
+    parent.removeChild(hr);
+}
+
+function add_OR(id=-1) {
+    input_number += 1;
+
+    if (id == -1){
+        div = filter_div;
+    } else {
+        div = document.getElementById('div-input-' + id);
+    }
+
+    let del = document.createElement("I");
+    del.setAttribute('id', "filter-del-" + input_number);
+    del.setAttribute('data-toggle', 'tooltip');
+    del.setAttribute('data-placement', 'right');
+    del.setAttribute('title', 'Remove filter');
+    del.setAttribute('class', "fas fa-times fa-2x");
+    del.style.color = 'tomato';
+    del.setAttribute('onclick', "remove_OR_AND(" + input_number + ")");
+
+    let add = document.createElement("I");
+    add.setAttribute('id', "filter-del-" + input_number);
+    add.setAttribute('data-toggle', 'tooltip');
+    add.setAttribute('data-placement', 'right');
+    add.setAttribute('title', 'Add filter');
+    add.setAttribute('class', "fas fa-plus fa-2x");
+    add.style.marginLeft = "10px"
+    add.style.color = 'green';
+    add.setAttribute('onclick', "add_input(" + input_number + ")");
+
+    let or =document.createElement("INPUT");
+    or.setAttribute('type', 'button');
+    or.setAttribute('class', 'btn btn-primary');
+    or.setAttribute('value', 'OR');
+    or.style.marginLeft = "10px";
+    or.setAttribute('onclick', "add_OR(" + input_number + ")");
+
+    let input_or = document.createElement("INPUT");
+    input_or.setAttribute('id', 'input_or-' + input_number);
+    input_or.setAttribute('name', 'input_or-' + input_number);
+    input_or.style.display = 'none';
+
+    let input_end_or = document.createElement("INPUT");
+    input_end_or.setAttribute('id', 'input_end_or-' + input_number);
+    input_end_or.setAttribute('name', 'input_end_or-' + input_number);
+    input_end_or.style.display = 'none';
+
+    let row = document.createElement('DIV');
+    row.setAttribute('id', 'filter-row-' + input_number);
+    row.setAttribute('class', 'row');
+
+    let col_l = document.createElement("DIV");
+    col_l.setAttribute('class', 'col-sm-3');
+    col_l.innerHTML = "<hr>";
+
+    let col_m = document.createElement('DIV');
+    col_m.setAttribute('class', 'col-sm-2');
+    col_m.style.textAlign = "center";
+    col_m.innerHTML = "OR";
+
+    let col_r = document.createElement("DIV");
+    col_r.setAttribute('class', 'col-sm-3');
+    col_r.innerHTML = "<hr>";
+
+    let col_del = document.createElement("DIV");
+    col_del.setAttribute('class', 'col-sm-2');
+    col_del.appendChild(del);
+    col_del.appendChild(add);
+    col_del.appendChild(or);
+
+
+
+    let div_input = document.createElement("DIV");
+    div_input.setAttribute('id', "div-input-" + input_number);
+
+
+    let hr = document.createElement("DIV");
+    hr.innerHTML = "<hr>";
+    hr.setAttribute('id', 'hr-' + input_number);
+
+    row.appendChild(input_or);
+    row.appendChild(col_l);
+    row.appendChild(col_m);
+    row.appendChild(col_r);
+    row.appendChild(col_del);
+
+    div.appendChild(row);
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip({
+    trigger : 'hover'
+    });
+    });
+    div.appendChild(div_input);
+    div.appendChild(input_end_or);
+    div.appendChild(hr);
+    add_input(input_number);
+}
 //remplissage du filter-form
 add_input();
 
