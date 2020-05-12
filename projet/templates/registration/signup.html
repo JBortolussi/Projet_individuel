@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load crispy_forms_filters %}
+
+{% block title %}- Sign Up {% endblock %}
+
+{% block nav_button %}
+    {# Sign Up button #}
+    <li class="nav-item">
+        <a href="{% url 'login' %}" type="submit" class="btn btn-primary">
+            <i class="fa fa-sign-in-alt align-middle" aria-hidden="true"></i>
+            <span class="align-middle">Sign in</span>
+        </a>
+    </li>
+{% endblock %}
+
+<!--This block is use in order to remove the line with path "Projet/..."-->
+{% block to_remove_path %}{% endblock %}
+
+{% block page %}
+    <div class="container-fluid" style="margin-top: 1%">
+        <div class="row">
+            <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+                <h4 class="text-center">Sign Up</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-success btn-block">
+                        <i class="fa fa-user-plus align-middle" aria-hidden="true"></i>
+                        <span class="align-middle">Sign Up</span>
+                    </button>
+                </form>
+                <div class="text-center mt-3"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
+            </div>
+
+
+        </div>
+    </div>
+{% endblock %}

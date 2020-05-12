@@ -1,4 +1,9 @@
 {% extends "base.html" %}
+{% load static %}
+{% block links %}
+<link rel="stylesheet" type="text/css" href="{% static 'taskmanager/css/project.css' %}">
+{% endblock %}
+
 {% block title %} {{project.name}} {% endblock %}
 {% block line_path %}
     <a class="custom_link" href="{% url "projects" %}"> Projets </a>
@@ -9,16 +14,23 @@
 {% block page %}
 <br>
 
+
 <h1 style="display: inline">{{project.name}}</h1>
+<button id="filter_button" type="button" style="margin-left: 3%" class="btn btn-primary" >Filter</button>
 <a class="custom_link" href="{% url "newtask" project.id%}">
     <i data-toggle="tooltip" data-placement="left" title="Ajouter une tache" class="fas fa-plus-circle fa-3x" style="float: right;color: dodgerblue;"></i>
 </a>
 
-
-
 <div class="container-fluid" style="margin-top: 1%">
+    <div class="unactive" id="row-filter">
+        <form id="filter-form" action="" method="get">
+            <input type="submit">
+        </form>
+        <button id="button-add"onclick="add_input()">add</button>
+    </div>
 
-<table class="table">
+<div class="row" id="row-table">
+        <table class="table">
     <thead>
         <tr>
             <th>Task</th>
@@ -53,6 +65,16 @@
         {% endfor %}
     </tbody>
 </table>
+</div>
+
 
 </div>
+<script>
+    let user_tab = [];
+    {% for user in users %}
+    user_tab.push(["{{user}}", "{{user.id}}"]);
+    {% endfor %}
+</script>
+<script src="{% static 'taskmanager/js/project.js' %}"></script>
 {% endblock %}
+

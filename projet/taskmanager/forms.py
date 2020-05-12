@@ -7,24 +7,24 @@ from django.forms import DateInput
 from .models import Projet, Journal, Task, Status
 
 
-
-class ConnexionForm(forms.Form):
-    """Form for the connection page
-
-    Set up the style properties
-    """
-
-    def __init__(self, *args, **kwargs):
-        super(ConnexionForm, self).__init__(*args, **kwargs)
-
-        # Set up the style properties
-        self.fields['username'].label = "Nom d'utilisateur"
-        self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du d'utilisateur"})
-        self.fields['password'].label = "Mot de passe"
-        self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': "Mot de passe"})
-
-    username = forms.CharField(label="Nom d'utilisateur", max_length=30)
-    password = forms.CharField(label="Mot de passe", widget=forms.PasswordInput)
+# REPLACED BY GENERIC VIEWS
+# class ConnexionForm(forms.Form):
+#     """Form for the connection page
+#
+#     Set up the style properties
+#     """
+#
+#     def __init__(self, *args, **kwargs):
+#         super(ConnexionForm, self).__init__(*args, **kwargs)
+#
+#         # Set up the style properties
+#         self.fields['username'].label = "Nom d'utilisateur"
+#         self.fields['username'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du d'utilisateur"})
+#         self.fields['password'].label = "Mot de passe"
+#         self.fields['password'].widget.attrs.update({'class': 'form-control', 'placeholder': "Mot de passe"})
+#
+#     username = forms.CharField(label="Nom d'utilisateur", max_length=30)
+#     password = forms.CharField(label="Mot de passe", widget=forms.PasswordInput)
 
 
 class ProjectForm(forms.ModelForm):

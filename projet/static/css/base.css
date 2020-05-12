@@ -10,3 +10,7 @@
 .form-inline {
     display: inline;
 }
+
+.asteriskField {
+    display: none;
+}

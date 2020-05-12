@@ -9,6 +9,7 @@ from django.dispatch import receiver
 from django.db.models.signals import  m2m_changed, pre_delete
 from django.utils import timezone
 
+# Create your models here.
 
 class ProjetAdmin(admin.ModelAdmin):
     # configuration vue projet dans Admin
@@ -72,10 +73,11 @@ class Task(models.Model):
     projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
-    start_date = models.DateField(default=date.today, verbose_name="Date de début")
-    due_date = models.DateField(default=date.today, verbose_name="Date de fin")
-    priority = models.IntegerField(default=1, help_text="Between 1 and 10")
-    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True, default=1)
+    start_date = models.DateField(verbose_name="Date de début")
+    due_date = models.DateField(verbose_name="Date de fin")
+    priority = models.IntegerField()
+    status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
+    last_modification = models.TimeField(null=True, blank=True)
 
     def __str__(self):
         return self.name
