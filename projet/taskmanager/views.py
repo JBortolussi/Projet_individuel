@@ -252,7 +252,7 @@ def newtask_view(request, project_id):
             form = TaskForm(project, request.POST)
             if form.is_valid():
                 task = form.save(commit=True)
-                task.last_modification = datetime.datetime.now() # it's probably not necessary
+                task.last_modification = datetime.datetime.now()  # it's probably not necessary
                 task.save()
                 return redirect("task", task_id=task.id)
         else:
