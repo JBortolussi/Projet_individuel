@@ -387,7 +387,7 @@ def data_selection(request):
     return render(request, 'data_selection.html', locals())
 
 
-@login_required()
+# NOT a view, but the function used to export the data
 def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, exp_j=False, exp_s=False,
                   querysets=None):
     """ This view generates a zip file containing all the data required by the user.
@@ -440,6 +440,7 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
             output = io.BytesIO()
         else:
             output = io.StringIO()
+
         # get queryset model
         model = queryset.model
         # the export code depends on the file format
@@ -516,6 +517,7 @@ def download_data(request, file_format, exp_p=False, exp_m=False, exp_t=False, e
                 ws.write(row_num, col_num, field_names[col_num].upper(), font_style)
 
             # add a column for the members of the project
+            # (otherwise it won't be done automatically because it's ManytoMany)
             if model == Projet:
                 ws.write(row_num, col_num + 1, 'MEMBERS', font_style)
 

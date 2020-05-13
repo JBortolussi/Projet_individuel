@@ -39,19 +39,22 @@ class Status(models.Model):
 
 class Task(models.Model):
     name = models.CharField(max_length=100, verbose_name="Nom")
+    # the null property is True because we assign the project manually to the task after having checked if the assignee
+    # attribute is a member of the project
     projet = models.ForeignKey("Projet", on_delete=models.CASCADE, null=True)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)   # not compulsory to write the description
     assignee = models.ForeignKey(User, null=True, on_delete=models.SET_NULL)
     start_date = models.DateField(default=date.today, verbose_name="Date de début")
     due_date = models.DateField(default=date.today, verbose_name="Date de fin")
     priority = models.SmallIntegerField(default=1, help_text="Entre 1 et 10")
     status = models.ForeignKey('Status', on_delete=models.SET_NULL, null=True)
     last_modification = models.DateTimeField(auto_now_add=True)
-    completion_percentage = models.SmallIntegerField(default=0)
+    completion_percentage = models.SmallIntegerField(default=0, verbose_name="Pourcentage d'avancement")
 
     def __str__(self):
         return self.name
 
+    # check if assignee is a member of the project
     def clean(self):
         if self.projet is None:
             return

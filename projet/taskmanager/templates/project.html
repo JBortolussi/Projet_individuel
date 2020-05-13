@@ -13,9 +13,7 @@
 {% endblock %}
 
 {% block page %}
-
-
-    <h1 style="display: inline">{{ project.name }}</h1>
+    <h2 style="display: inline">{{ project.name }}</h2>
     <button id="filter_button" type="button" style="margin-left: 3%" class="btn btn-primary">Filter</button>
     <a class="custom_link" href="{% url "newtask" project.id %}">
         <i data-toggle="tooltip" data-placement="left" title="Ajouter une tache" class="fas fa-plus-circle fa-3x"
@@ -31,13 +29,14 @@
         </div>
 
         <div class="row" id="row-table">
-            <table class="table">
+            <table class="table table-hover">
                 <thead>
                 <tr>
                     <th>Task</th>
                     <th>Assignee</th>
                     <th>Start Date</th>
                     <th>Due Date</th>
+                    <th>Priority</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -48,16 +47,17 @@
                             <td><span class="badge badge-danger">Personne</span></td>
                         {% else %}
                             {% if not task.assignee.last_name %}
-                                <td><span class="badge badge-primary">{{ task.assignee.username }}</span></td>
+                                <td><span class="badge badge-primary p-2">{{ task.assignee.username }}</span></td>
                             {% else %}
                                 <td><span
-                                        class="badge badge-primary">{{ task.assignee.first_name }} {{ task.assignee.last_name }}</span>
+                                        class="badge badge-primary p-2">{{ task.assignee.first_name }} {{ task.assignee.last_name }}</span>
                                 </td>
                             {% endif %}
                         {% endif %}
 
                         <td>{{ task.start_date }}</td>
-                        <td>{{ task.due_date }}
+                        <td>{{ task.due_date }}</td>
+                        <td>{{ task.priority }}
                             <div style="float: right">
                                 <a class="custom_link" href="{% url "edittask" task.id %}">
                                     <i data-toggle="tooltip" data-placement="left" title="Editer la tâche"
@@ -72,6 +72,15 @@
         </div>
 
 
+    </div>
+    <div class="container-fluid">
+        <h5>Members of this project</h5>
+
+        <ul class="list-group list-group-horizontal-md mt-3">
+            {% for member in project.members.all %}
+                <li class="list-group-item {% if member == user %}list-group-item-primary{% endif %}">{{ member }}</li>
+            {% endfor %}
+        </ul>
     </div>
     <script>
         let user_tab = [];

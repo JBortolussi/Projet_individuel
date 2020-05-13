@@ -10,18 +10,19 @@
 
 {% block page %}
 
-    <h1 style="display: inline">{{ project.name }}</h1>
+    <h2 style="display: inline">{{ project.name }}</h2>
     {# Display the edit button #}
     <a class="custom_link" href="{% url "edittask" task.id %}">
         <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x"
            style="float: right;color: dodgerblue;"></i>
     </a>
-    <h3>{{ task.name }}</h3>
+    <h3 class="mt-2">{{ task.name }}</h3>
 
 
     <div class="container-fluid" style="margin-top: 1%">
-        {{ task.description }}
-        <table class="table">
+        <p class="pd-3 shadow-sm text-justify">{{ task.description }}</p>
+
+        <table class="table table-hover">
             <tbody>
             <tr>
                 <td><B>Assignee</B></td>
@@ -29,10 +30,10 @@
                     <td><span class="badge badge-danger">Personne</span></td>
                 {% else %}
                     {% if not task.assignee.last_name %}
-                        <td><span class="badge badge-primary">{{ task.assignee.username }}</span></td>
+                        <td><span class="badge badge-primary p-2">{{ task.assignee.username }}</span></td>
                     {% else %}
                         <td><span
-                                class="badge badge-primary">{{ task.assignee.first_name }} {{ task.assignee.last_name }}</span>
+                                class="badge badge-primary p-2">{{ task.assignee.first_name }} {{ task.assignee.last_name }}</span>
                         </td>
                     {% endif %}
                 {% endif %}
@@ -46,12 +47,23 @@
                 <td>{{ task.due_date }}</td>
             </tr>
             <tr>
+                <td><B>Priority</B></td>
+                <td><span class="badge">{{ task.priority }}</span></td>
+            </tr>
+            <tr>
                 <td><B>Status</B></td>
                 <td><span class="badge badge-warning">{{ task.status.name }}</span></td>
             </tr>
             <tr>
                 <td><B>Latest Modification</B></td>
-                <td><span class="badge badge-warning">{{ task.last_modification }}</span></td>
+                <td><span class="badge">{{ task.last_modification }}</span></td>
+            </tr>
+            <tr>
+                <td><B>Completion Percentage</B></td>
+                <td><span class="progress-bar" data-transitiongoal="{{ task.completion_percentage }}"
+                          aria-valuenow="{{ task.completion_percentage }}"
+                          style="width:{{ task.completion_percentage }}%;">{{ task.completion_percentage }} %</span>
+                </td>
             </tr>
             </tbody>
         </table>
@@ -76,6 +88,7 @@
             {% endfor %}
             </tbody>
         </table>
+
         {# Journal form section #}
         {# To be active mean to be hidden #}
         {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
@@ -94,7 +107,10 @@
                     {% csrf_token %}
                     <div class="row">
                         <div style="float: left">
-                            <button type="submit" class="btn btn-primary" style="display: inline">Envoyer</button>
+                            <button type="submit" class="btn btn-success mr-2" style="display: inline">
+                                <i class="fa fa-share-square align-middle" aria-hidden="true"></i>
+                                <span class="align-middle">Send</span>
+                            </button>
                         </div>
                         <div style="flex-grow: 1">
                             <div class="form-group" style="flex-grow: 1;">
@@ -107,8 +123,9 @@
         </div>
     </div>
 
-    {# This code implement the buttons which display/hide the journal form #}
 {% endblock %}
+
+{# This code implement the buttons which display/hide the journal form #}
 {% block scriptBase %}
     <!--<script>-->
     let CA=document.getElementById("CA");

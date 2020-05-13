@@ -13,7 +13,7 @@ class ProjetAdmin(admin.ModelAdmin):
     ordering = ('name',)
     search_fields = ('name',)
 
-    # Ensure that the prject has at least one member
+    # Ensure that the project has at least one member
     def clean(self):
         if not self.members:
             raise ValidationError("Un projet doit avoir au moins un membre")
