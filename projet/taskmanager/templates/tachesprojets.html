@@ -39,12 +39,22 @@
                 <tbody>
                     {% for task in project.task_set.all %}
                         <tr>
-                            <td>{{ task.name }}</td>
+                            <td>
+                                <div style="color: dodgerblue;cursor: pointer;" data-toggle="tooltip" data-placement="right" title="{{task.description}}">
+                                    {{ task.name }}
+                                </div>
+                            </td>
                             <td>{{ task.assignee }}</td>
                             <td>{{ task.start_date }}</td>
                             <td>{{ task.due_date }}</td>
                             <td>{{ task.priority }}</td>
-                            <td>{{ task.status }}</td>
+                            <td>{{ task.status }}
+                                {% if task.assignee == user %}
+                                <div style="float: right">
+                                    *
+                                </div>
+                                {% endif %}
+                            </td>
                         </tr>
                     {% endfor %}
                 </tbody>

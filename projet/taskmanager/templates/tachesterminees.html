@@ -36,7 +36,11 @@
             <tbody>
                 {% for task in tasks %}
                     <tr>
-                        <td>{{ task.name }}</td>
+                        <td>
+                            <div style="color: dodgerblue;cursor: pointer;" data-toggle="tooltip" data-placement="right" title="{{task.description}}">
+                                    {{ task.name }}
+                                </div>
+                        </td>
                         <td>{{ task.projet }}</td>
                         <td>{{ task.start_date }}</td>
                         <td>{{ task.due_date }}</td>
