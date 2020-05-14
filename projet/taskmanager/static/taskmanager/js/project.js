@@ -188,13 +188,15 @@ function remove_OR_AND(id) {
 
     let div = document.getElementById("div-input-" + id);
     let hr = document.getElementById("hr-" + id);
+    let end_or = document.getElementById('input_end_or-' + id)
 
     parent.removeChild(row);
     parent.removeChild(div);
+    parent.removeChild(end_or);
     parent.removeChild(hr);
 }
 
-function add_OR(id=-1) {
+function add_OR_AND(id=-1, method) {
     input_number += 1;
 
     if (id == -1){
@@ -227,17 +229,17 @@ function add_OR(id=-1) {
     or.setAttribute('class', 'btn btn-primary');
     or.setAttribute('value', 'OR');
     or.style.marginLeft = "10px";
-    or.setAttribute('onclick', "add_OR(" + input_number + ")");
+    or.setAttribute('onclick', "add_OR_AND(" + input_number + ", \'or\' )");
 
-    let input_or = document.createElement("INPUT");
-    input_or.setAttribute('id', 'input_or-' + input_number);
-    input_or.setAttribute('name', 'input_or-' + input_number);
-    input_or.style.display = 'none';
+    let input = document.createElement("INPUT");
+    input.setAttribute('id', 'input_' + method + '-' + input_number);
+    input.setAttribute('name', 'input_' + method + '-' + input_number);
+    input.style.display = 'none';
 
-    let input_end_or = document.createElement("INPUT");
-    input_end_or.setAttribute('id', 'input_end_or-' + input_number);
-    input_end_or.setAttribute('name', 'input_end_or-' + input_number);
-    input_end_or.style.display = 'none';
+    let input_end = document.createElement("INPUT");
+    input_end.setAttribute('id', 'input_end_' + method + '-' + input_number);
+    input_end.setAttribute('name', 'input_end_' + method + '-' + input_number);
+    input_end.style.display = 'none';
 
     let row = document.createElement('DIV');
     row.setAttribute('id', 'filter-row-' + input_number);
@@ -250,7 +252,7 @@ function add_OR(id=-1) {
     let col_m = document.createElement('DIV');
     col_m.setAttribute('class', 'col-sm-2');
     col_m.style.textAlign = "center";
-    col_m.innerHTML = "OR";
+    col_m.innerHTML = method.toUpperCase();
 
     let col_r = document.createElement("DIV");
     col_r.setAttribute('class', 'col-sm-3');
@@ -262,8 +264,6 @@ function add_OR(id=-1) {
     col_del.appendChild(add);
     col_del.appendChild(or);
 
-
-
     let div_input = document.createElement("DIV");
     div_input.setAttribute('id', "div-input-" + input_number);
 
@@ -272,7 +272,7 @@ function add_OR(id=-1) {
     hr.innerHTML = "<hr>";
     hr.setAttribute('id', 'hr-' + input_number);
 
-    row.appendChild(input_or);
+    row.appendChild(input);
     row.appendChild(col_l);
     row.appendChild(col_m);
     row.appendChild(col_r);
@@ -285,7 +285,7 @@ function add_OR(id=-1) {
     });
     });
     div.appendChild(div_input);
-    div.appendChild(input_end_or);
+    div.appendChild(input_end);
     div.appendChild(hr);
     add_input(input_number);
 }

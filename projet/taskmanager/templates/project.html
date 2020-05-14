@@ -40,8 +40,8 @@
                 <!-- Modal footer -->
                 <div class="modal-footer">
                     <i data-toggle="tooltip" data-placement="right" title="Add a filter" class="fas fa-plus-circle fa-2x mr-auto" style="float: left;color: green;" onclick="add_input()"></i>
-                    <input type="button" class="btn btn-primary mr-auto" value="OR" onclick="add_OR(-1)">
-                    <input type="button" class="btn btn-primary mr-auto" value="AND">
+                    <input type="button" class="btn btn-primary mr-auto" value="OR" onclick="add_OR_AND(-1, 'or')">
+                    <input type="button" class="btn btn-primary mr-auto" value="AND" onclick="add_OR_AND(-1, 'and')">
                     <input type="submit" class="btn btn-success"value="Search">
                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                 </div>
@@ -51,14 +51,24 @@
     </div>
 
 <div class="row" id="row-table">
-        <table class="table">
+        <table id="table" class="table">
     <thead>
         <tr>
-            <th>Task</th>
-            <th>Status</th>
-            <th>Assignee</th>
-            <th>Start Date</th>
-            <th>Due Date</th>
+            <th>Task
+
+            </th>
+            <th>Status
+
+            </th>
+            <th>Assignee
+
+            </th>
+            <th>Start Date
+
+            </th>
+            <th>Due Date
+
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -101,7 +111,102 @@
     {% for stat in status %}
     status_tab.push(["{{stat}}", "{{stat.id}}"]);
     {% endfor %}
+
+const compare = (ids, asc) => (row1, row2) => {
+  const tdValue = (row, ids) => row.children[ids].textContent;
+  const tri = (v1, v2) => v1.toString().localeCompare(v2);
+  return tri(tdValue(asc ? row1 : row2, ids), tdValue(asc ? row2 : row1, ids));
+};
+
+const mouth2int = (str) => {
+    if (str == 'January'){
+        return 1;
+    } else if (str == 'February'){
+        return 2;
+    } else if (str == 'March'){
+        return 3;
+    } else if (str == 'April'){
+        return 4;
+    } else if (str == 'May'){
+        return 5;
+    } else if (str == 'June'){
+        return 6;
+    } else if (str == 'July'){
+        return 7;
+    } else if (str == 'August'){
+        return 8;
+    } else if (str == 'September'){
+        return 9;
+    } else if (str == 'October'){
+        return 10;
+    } else if (str == 'November'){
+        return 11;
+    } else if (str == 'December'){
+        return 12;
+    }
+}
+
+const compare_date = (ids, asc) => (row1, row2) => {
+  const tdValue = (row, ids) => {
+      let val = row.children[ids].textContent;
+      let tab = val.split(', ');
+      tab = [tab[0].split(' '), parseInt(tab[1])];
+      return [tab[1], mouth2int(tab[0][0]), parseInt(tab[0][1])]
+  };
+  const tri = (v1, v2) => {
+      if (v1[0] - v2[0] !== 0){
+          return v1[0] - v2[0];
+      } else if (v1[1] - v2[1] !== 0){
+          return v1[1] - v2[1];
+      } else {
+          return v1[2] - v2[2];
+      }
+    };
+  return tri(tdValue(asc ? row1 : row2, ids), tdValue(asc ? row2 : row1, ids));
+};
+
+const tbody = document.querySelector('tbody');
+const thx = document.querySelectorAll('th');
+
+thx.forEach(th => {
+    let el = document.createElement('div');
+    el.style.display = "inline";
+    el.innerHTML =  "<i class=\"fas fa-sort fa-2x sort_none\" style=\"float: right;color: dodgerblue;\"></i>" +
+                    "<i class=\"fas fa-sort-down fa-2x sort_down unactive\" style=\"float: right;color: dodgerblue;\"></i>" +
+                    "<i class=\"fas fa-sort-up fa-2x sort_up unactive\" style=\"float: right;color: dodgerblue;\"></i>";
+    th.appendChild(el);
+})
+
+const trxb = tbody.querySelectorAll('tr');
+const sort_none = document.querySelectorAll('.sort_none');
+const sort_up = document.querySelectorAll('.sort_up');
+const sort_down = document.querySelectorAll('.sort_down');
+
+thx.forEach(th => th.addEventListener('click', () => {
+  let classe = Array.from(trxb);
+  if (th.innerText.includes('Date')){
+      classe = classe.sort(compare_date(Array.from(thx).indexOf(th), this.asc = !this.asc));
+  }else{
+      classe = classe.sort(compare(Array.from(thx).indexOf(th), this.asc = !this.asc));
+  }
+  classe.forEach(tr => tbody.appendChild(tr));
+
+  sort_none.forEach(i => i.classList.remove('unactive'));
+  sort_down.forEach(i => i.classList.add('unactive'));
+  sort_up.forEach(i => i.classList.add('unactive'));
+
+  Array.from(sort_none)[Array.from(thx).indexOf(th)].classList.add('unactive');
+  if (this.asc){
+      Array.from(sort_up)[Array.from(thx).indexOf(th)].classList.remove('unactive');
+  } else {
+      Array.from(sort_down)[Array.from(thx).indexOf(th)].classList.remove('unactive');
+  }
+
+
+
+}));
 </script>
 <script src="{% static 'taskmanager/js/project.js' %}"></script>
+
 {% endblock %}
 

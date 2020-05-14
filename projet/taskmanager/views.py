@@ -225,6 +225,7 @@ def add_filter(filters, entry):
 
 def creat_filters_rec(project, filter_dic, filter_id_tab):
 
+    type = ''
     filters = Q()
     skip = 0
     id_sub_tab = []
@@ -232,21 +233,38 @@ def creat_filters_rec(project, filter_dic, filter_id_tab):
         id = filter_id_tab[i]
 
         if (skip != 0):
-            if not (('input_end_or-' in id) and (skip == 1) ):
+            if (skip != 1):
                 id_sub_tab.append(id)
-        elif not ('input_or-' in id):
+            elif (not ((type == 'or') and ('input_end_or-' in id))) and (not ((type == 'and') and ('input_end_and-' in id))):
+                id_sub_tab.append(id)
+        elif not (('input_or-' in id) or ('input_and-' in id)):
             filters = add_filter(filters, filter_dic[id])
 
-        if ('input_or-' in id):
+        if ('input_or-' in id) and (type != 'and'):
+            type = 'or'
             skip += 1
 
-        if ('input_end_or-' in id):
+        if ('input_and-' in id) and (type != 'or'):
+            type = 'and'
+            skip += 1
+
+        if ('input_end_or-' in id) and (type == 'or'):
             skip -= 1
             if skip == 0:
                 filter_temp = creat_filters_rec(project, filter_dic, id_sub_tab)
                 set_temp = project.task_set.filter(filter_temp)
                 filters |= Q(pk__in=set_temp)
                 id_sub_tab = []
+                type = ''
+
+        if ('input_end_and-' in id) and (type == 'and'):
+            skip -= 1
+            if skip == 0:
+                filter_temp = creat_filters_rec(project, filter_dic, id_sub_tab)
+                set_temp = project.task_set.filter(filter_temp)
+                filters &= Q(pk__in=set_temp)
+                id_sub_tab = []
+                type = ''
 
     return filters
 
