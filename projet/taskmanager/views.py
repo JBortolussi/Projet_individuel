@@ -175,9 +175,9 @@ def edit_project_view(request, project_id):
     return redirect("projects")
 
 def add_filter(filters, entry):
-    method = entry[0]
-    value = entry[1]
-    link = entry[2]
+    method = entry[1]
+    value = entry[2]
+    link = entry[0]
 
     if method == 'assign':
         if link == "and":

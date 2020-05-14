@@ -128,7 +128,7 @@ function add_input(id=-1) {
 
     select.addEventListener("change",function() {
         let id = this.name;
-        col2 = document.getElementById("col2-" + id);
+        col2 = document.getElementById("col3-" + id);
         let child = col2.firstChild;
         col2.removeChild(child);
 
@@ -150,18 +150,18 @@ function add_input(id=-1) {
     del.style.color = 'tomato';
     del.setAttribute('onclick', "remove_input(" + input_number + ")");
 
-    let col1 = document.createElement('DIV');
-    col1.setAttribute('class', 'col-sm-3');
-    col1.appendChild(select);
-
     let col2 = document.createElement('DIV');
-    col2.setAttribute('id', 'col2-' + input_number);
     col2.setAttribute('class', 'col-sm-3');
-    col2.appendChild(text_dic['' + input_number][1]);
+    col2.appendChild(select);
 
     let col3 = document.createElement('DIV');
-    col3.setAttribute('class', 'col-sm-2');
-    col3.appendChild(link);
+    col3.setAttribute('id', 'col3-' + input_number);
+    col3.setAttribute('class', 'col-sm-3');
+    col3.appendChild(text_dic['' + input_number][1]);
+
+    let col1 = document.createElement('DIV');
+    col1.setAttribute('class', 'col-sm-2');
+    col1.appendChild(link);
 
     let col4 = document.createElement('DIV');
     col4.setAttribute('class', 'col-sm-3');
