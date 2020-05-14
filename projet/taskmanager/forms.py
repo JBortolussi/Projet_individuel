@@ -48,9 +48,9 @@ class ProjectForm(forms.ModelForm):
         super(ProjectForm, self).__init__(*args, **kwargs)
 
         # Set the style properties
-        self.fields['name'].label = "Nom du projet"
-        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': "Nom du projet"})
-        self.fields['members'].label = "Membres du projet"
+        self.fields['name'].label = "Project name"
+        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': "Project name"})
+        self.fields['members'].label = "Projects members"
         self.fields['members'].widget.attrs.update({'class': 'form-control'})
         self.fields['members'].initial = user
 
@@ -61,7 +61,7 @@ class ProjectForm(forms.ModelForm):
     def clean(self):
         """Ensure the the project ha at least one member"""
         if not self.cleaned_data['members']:
-            raise ValidationError("Un projet doit avoir au moins un membre")
+            raise ValidationError("A project need at least one member")
 
 
 class JournalForm(forms.ModelForm):
@@ -88,30 +88,33 @@ class TaskForm(forms.ModelForm):
         super(TaskForm, self).__init__(*args, **kwargs)
 
         # Set the style properties
-        self.fields['assignee'].label = "Assignée à :"
+        self.fields['assignee'].label = "Assign to :"
         self.fields['assignee'].widget.attrs.update({'class': 'form-control'})
         # Actually limit the choices for the assignee field
         self.fields['assignee'].choices = assignee_choices
-        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Nom de la tâche'})
+        self.fields['name'].label = 'Task name'
+        self.fields['name'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Task name'})
         self.fields['description'].widget.attrs.update(
-            {'class': 'form-control', 'placeholder': 'Description de la tache', 'rows': 4})
+            {'class': 'form-control', 'placeholder': 'Task description', 'rows': 4})
+        self.fields['start_date'].label = 'Start date'
         self.fields['start_date'].widget.attrs.update({'class': 'form-control', })
         # Initialize the start_date field with the current date
         self.fields['start_date'].initial = datetime.now().strftime("%Y-%m-%d")
+        self.fields['due_date'].label = 'Due date'
         self.fields['due_date'].widget.attrs.update({'class': 'form-control'})
         self.fields['status'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].widget.attrs.update({'class': 'form-control'})
         self.fields['priority'].initial = 1
         self.fields['completion_percentage'].widget.attrs.update({'class': 'form-control'})
         self.fields['completion_percentage'].initial = 1
-        self.fields['completion_percentage'].label = "Pourcentage d'avancement"
+        self.fields['completion_percentage'].label = "Advancement"
         # This field is only used in order to set up the project field with the project.
         # Shall not be modified by the user
         self.fields['projet'].widget.attrs.update({'style': 'display: none'})
         self.fields['projet'].initial = project
         # If a "new" status has be defined then initialize the status field with it
-        if Status.objects.filter(name="Nouvelle"):
-            self.fields['status'].initial = Status.objects.filter(name="Nouvelle")[0]
+        if Status.objects.filter(name="New"):
+            self.fields['status'].initial = Status.objects.filter(name="New")[0]
 
     class Meta:
         model = Task

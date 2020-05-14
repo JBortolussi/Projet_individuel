@@ -3,7 +3,7 @@
 {% block title %}- {{ task.name }} {% endblock %}
 
 {% block line_path %}
-    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projets</a></li>
+    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
     <li class="breadcrumb-item"><a href="{% url "project" project.id %}">{{ project.name }}</a></li>
     <li class="breadcrumb-item active"><a href="{% url "task" task.id %}">{{ task.name }}</a></li>
 {% endblock %}
@@ -13,7 +13,7 @@
     <h2 style="display: inline">{{ project.name }}</h2>
     {# Display the edit button #}
     <a class="custom_link" href="{% url "edittask" task.id %}">
-        <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-3x"
+        <i data-toggle="tooltip" data-placement="left" title="Edit task" class="fas fa-edit fa-3x"
            style="float: right;color: dodgerblue;"></i>
     </a>
     <h3 class="mt-2">{{ task.name }}</h3>
@@ -27,7 +27,7 @@
             <tr>
                 <td><B>Assignee</B></td>
                 {% if task.assignee == None %}
-                    <td><span class="badge badge-danger">Personne</span></td>
+                    <td><span class="badge badge-danger">Nobody</span></td>
                 {% else %}
                     {% if not task.assignee.last_name %}
                         <td><span class="badge badge-primary p-2">{{ task.assignee.username }}</span></td>
@@ -92,13 +92,13 @@
         {# Journal form section #}
         {# To be active mean to be hidden #}
         {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
-        <i id="CA" data-toggle="tooltip" data-placement="left" title="Ajouter une information"
+        <i id="CA" data-toggle="tooltip" data-placement="left" title="Add a comment"
            class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
         {# CB is initially hidden. Will be displayed when the first button will clicked #}
         <div id="CB" class="row active">
             <div class="col-sm-1">
                 {# The second button. When clicked it will be hidden and the first button will be displayed again #}
-                <i id="IB" data-toggle="tooltip" data-placement="left" title="Annuler" class="fas fa-times-circle fa-3x"
+                <i id="IB" data-toggle="tooltip" data-placement="left" title="Cancel" class="fas fa-times-circle fa-3x"
                    style="display: inline;color: tomato;"></i>
             </div>
             <div class="col-sm-11">

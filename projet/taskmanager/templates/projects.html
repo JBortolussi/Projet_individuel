@@ -7,11 +7,11 @@
 {% endblock %}
 
 {% block page %}
-    <h2 style="display: inline">Projets</h2>
+    <h2 style="display: inline">Projects</h2>
 
     <!--Button to project creation page-->
     <a class="custom_link" href="{% url "new_project" %}">
-        <i data-toggle="tooltip" data-placement="left" title="Ajouter un projet" class="fas fa-plus-circle fa-3x"
+        <i data-toggle="tooltip" data-placement="left" title="Add project" class="fas fa-plus-circle fa-3x"
            style="float: right;color: dodgerblue;"></i>
     </a>
 
@@ -27,14 +27,14 @@
 
                     <!--Button to delete the project-->
                     <a class="custom_link" href="{% url "delete_project" project.id %}">
-                        <i data-toggle="tooltip" data-placement="left" title="Supprimer projet"
+                        <i data-toggle="tooltip" data-placement="left" title="Remove project"
                            class="fas fa-times-circle fa-2x" style="float: right;color: tomato;"></i>
                     </a>
 
                     <!--Button to edit the project-->
                     <a class="custom_link" style="margin-right: 1%;display: inline-block; float:right"
                        href="{% url "edit_project" project.id %}">
-                        <i data-toggle="tooltip" data-placement="left" title="Editer projet"
+                        <i data-toggle="tooltip" data-placement="left" title="Edit project"
                            class="fas fa-edit fa-2x"
                            style="float: right;color: dodgerblue;"></i>
                     </a>
