@@ -302,7 +302,20 @@ def edittask_view(request, task_id):
 
 @login_required()
 def my_profile(request):
-    projects = request.user.projets.all()
+    projects = request.user.projets.all()   # queryset
+
+
+    # PIE CHART (TASKS BY PROJECT and MEMBERS BY PROJECT)
+    labels = []
+    data_TBP = []
+    data_MBP = []
+
+    for project in projects:
+        labels.append(project.name)
+        data_TBP.append(project.task_set.all().count())
+        data_MBP.append(project.members.all().count())
+
+    chart_elements = range(len(labels))
 
     return render(request, "myprofile.html", locals())
 

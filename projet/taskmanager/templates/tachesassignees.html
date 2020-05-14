@@ -24,27 +24,108 @@
     <div class="container">
         <table class="table table-striped">
             <thead>
-                <tr>
-                    <th>Task</th>
-                    <th>Project</th>
-                    <th>Start Date</th>
-                    <th>Due Date</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                </tr>
+            <tr>
+                <th>Task</th>
+                <th>Project</th>
+                <th>Start Date</th>
+                <th>Due Date</th>
+                <th>Priority</th>
+                <th>Status</th>
+            </tr>
             </thead>
             <tbody>
-                {% for task in tasks %}
-                    <tr>
-                        <td>{{ task.name }}</td>
-                        <td>{{ task.projet }}</td>
-                        <td>{{ task.start_date }}</td>
-                        <td>{{ task.due_date }}</td>
-                        <td>{{ task.priority }}</td>
-                        <td>{{ task.status }}</td>
-                    </tr>
-                {% endfor %}
+            {% for task in tasks %}
+                <tr>
+                    <td>{{ task.name }}</td>
+                    <td>{{ task.projet }}</td>
+                    <td>{{ task.start_date }}</td>
+                    <td>{{ task.due_date }}</td>
+                    <td>{{ task.priority }}</td>
+                    <td>{{ task.status }}</td>
+                </tr>
+            {% endfor %}
             </tbody>
         </table>
     </div>
+
+
+    {# GANT CHART CONTAINER #}
+    <div class="container" id="gantt"></div>
+
+    {# import highcharts.js #}
+    <script src="https://code.highcharts.com/gantt/highcharts-gantt.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+    <script>
+
+        var today = new Date(),
+            day = 1000 * 60 * 60 * 24,
+            // Utility functions
+            dateFormat = Highcharts.dateFormat,
+            defined = Highcharts.defined,
+            isObject = Highcharts.isObject,
+            reduce = Highcharts.reduce;
+
+        // Set to 00:00:00:000 today
+        today.setUTCHours(0);
+        today.setUTCMinutes(0);
+        today.setUTCSeconds(0);
+        today.setUTCMilliseconds(0);
+        today = today.getTime();
+
+        {# Gantt chart #}
+        Highcharts.ganttChart('gantt', {
+
+            title: {
+                text: 'Gantt Chart with Task Progress'
+            },
+
+            xAxis: {
+                currentDateIndicator: true,
+                min: today - 10 * day,
+                max: today + 20 * day
+            },
+
+            navigator: {
+                enabled: true,
+                liveRedraw: true,
+                series: {
+                    type: 'gantt',
+                    pointPlacement: 0.5,
+                    pointPadding: 0.25
+                },
+                yAxis: {
+                    reversed: true,
+                    categories: [],
+                    min: 0,
+                    max: 10,
+                },
+            },
+            scrollbar: {
+                enabled: true
+            },
+            rangeSelector: {
+                enabled: true,
+                selected: 0
+            },
+
+            series: [{
+                name: 'My tasks',
+                data: [
+                    {% for task in tasks %}
+                        {
+                            start: Date.UTC({{ task.start_date|date:"Y" }}, {{ task.start_date|date:"n" }}, {{ task.start_date|date:"j" }}),
+                            end: Date.UTC({{ task.due_date|date:"Y" }}, {{ task.due_date|date:"n" }}, {{ task.due_date|date:"j" }}),
+                            completed: {{ task.completion_percentage }}/100,
+                            name: '{{ task.name }}',
+                            project: '{{ task.projet }}',
+                        },
+                    {% endfor %}
+
+
+                ]
+            }],
+
+        });
+    </script>
 {% endblock %}

@@ -59,4 +59,84 @@
             </tbody>
         </table>
     </div>
+
+    {# CHARTS CONTAINERs#}
+    <div class="row">
+        <div class="col-lg-6">
+            <canvas id="chart-1"></canvas>
+        </div>
+        <div class="col-lg-6">
+            <canvas id="chart-2"></canvas>
+        </div>
+    </div>
+    {# import chart.js #}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
+    <script>
+
+        {# TASKS BY PROJECT DONUT CHART #}
+        var config_1 = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: {{ data_TBP|safe }},
+                    backgroundColor: [{% for i in chart_elements %} getRandomColor(), {% endfor %}],
+                    label: 'Tasks'
+                }],
+                labels: {{ labels|safe }}
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Tasks by project',
+                    fontSize: 18,
+                },
+            }
+        };
+
+        {# MEMBERS BY PROJECT DONUT CHART #}
+        var config_2 = {
+            type: 'doughnut',
+            data: {
+                datasets: [{
+                    data: {{ data_MBP|safe }},
+                    backgroundColor: [{% for i in chart_elements %} getRandomColor(), {% endfor %}],
+                    label: 'Members'
+                }],
+                labels: {{ labels|safe }}
+            },
+            options: {
+                responsive: true,
+                title: {
+                    display: true,
+                    text: 'Members by project',
+                    fontSize: 18,
+                },
+
+            }
+        };
+
+        {# function used to get a random color for the data #}
+
+        function getRandomColor() {
+            var letters = '0123456789ABCDEF'.split('');
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        {# load the charts #}
+        window.onload = function () {
+            var chart_1 = document.getElementById('chart-1').getContext('2d');
+            window.myPie = new Chart(chart_1, config_1);
+            var chart_2 = document.getElementById('chart-2').getContext('2d');
+            window.myPie = new Chart(chart_2, config_2);
+
+        };
+    </script>
+
+
+
 {% endblock %}
