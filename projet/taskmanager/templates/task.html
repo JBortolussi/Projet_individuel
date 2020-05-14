@@ -90,16 +90,16 @@
         </table>
 
         {# Journal form section #}
-        {# To be active mean to be hidden #}
+        {# To be unactive mean to be hidden #}
         {# CA is initially the only things displayed in this section. Will be hidden when clicked #}
         <i id="CA" data-toggle="tooltip" data-placement="left" title="Add a comment"
-           class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;"></i>
+           class="fas fa-plus-square fa-3x" style="position: relative;left: 47%; color: dodgerblue;cursor: pointer"></i>
         {# CB is initially hidden. Will be displayed when the first button will clicked #}
-        <div id="CB" class="row active">
+        <div id="CB" class="row unactive">
             <div class="col-sm-1">
                 {# The second button. When clicked it will be hidden and the first button will be displayed again #}
                 <i id="IB" data-toggle="tooltip" data-placement="left" title="Cancel" class="fas fa-times-circle fa-3x"
-                   style="display: inline;color: tomato;"></i>
+                   style="display: inline;color: tomato;cursor: pointer"></i>
             </div>
             <div class="col-sm-11">
                 {# The Journal form #}
@@ -127,23 +127,21 @@
 
 {# This code implement the buttons which display/hide the journal form #}
 {% block scriptBase %}
-    <!--<script>-->
+
     let CA=document.getElementById("CA");
     let IB=document.getElementById("IB");
     let CB=document.getElementById("CB");
 
     function toggA(){
-    CB.classList.toggle("active");
-    CA.classList.toggle("active");
+    CB.classList.toggle("unactive");
+    CA.classList.toggle("unactive");
     };
     CA.onclick=toggA;
 
     function toggB(){
-    CA.classList.toggle("active");
-    CB.classList.toggle("active");
+    CA.classList.toggle("unactive");
+    CB.classList.toggle("unactive");
     };
     IB.onclick=toggB;
-
-    <!--//</script>-->
 
 {% endblock %}

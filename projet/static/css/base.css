@@ -11,3 +11,7 @@
 .asteriskField {
     display: none;
 }
+
+.unactive {
+    display: none;
+}
