@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 # models
 from django.contrib.auth.models import User
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Count
 from .models import Projet, Task, Journal, Status
 
 # forms
@@ -194,7 +194,7 @@ def creat_filters_rec(project, filter_dic, filter_id_tab):
             if (skip != 1):
                 id_sub_tab.append(id)
             elif (not ((type == 'or') and ('input_end_or-' in id))) and (
-            not ((type == 'and') and ('input_end_and-' in id))):
+                    not ((type == 'and') and ('input_end_and-' in id))):
                 id_sub_tab.append(id)
         elif not (('input_or-' in id) or ('input_and-' in id)):
             filters = add_filter(filters, filter_dic[id])
@@ -423,7 +423,6 @@ def edittask_view(request, task_id):
 def my_profile(request):
     projects = request.user.projets.all()  # queryset
 
-
     # PIE CHARTS (TASKS BY PROJECT and MEMBERS BY PROJECT)
     labels = []
     data_TBP = []
@@ -435,13 +434,16 @@ def my_profile(request):
         # calculate the project progress
         tasks_number = project.task_set.all().count()  # count all the tasks in this project
         # get all the completion percentage of all the tasks in this project, sum them all and then divide this
-        # number by the number of tasks
-        project.completion_percentage = project.task_set.all().aggregate(
+        # number by the number of tasks, if the task number is above 0 to avoid numeric troubles
+        if tasks_number > 0:
+            project.completion_percentage = project.task_set.all().aggregate(
             sum=Sum('completion_percentage'))['sum'] / tasks_number
+        else:
+            project.completion_percentage = 0
 
         # the following is used in the charts
         labels.append(project.name)
-        data_TBP.append(project.task_set.all().count()) # appends data to the lists used for the pie charts
+        data_TBP.append(project.task_set.all().count())  # appends data to the lists used for the pie charts
         data_MBP.append(project.members.all().count())
 
     chart_elements = range(len(labels))
@@ -470,13 +472,44 @@ def taches_projets(request):
     return render(request, "tachesprojets.html", locals())
 
 
+# page ACTIVITIES
 @login_required()
 def taches_recents_home(request):
     projects = request.user.projets.all()
 
+    # BAR CHART (ACTIONS BY PROJECT BY USER)
+    for project in projects:
+        # get the tasks of a project
+        tasks = project.task_set.all()
+        # get the journals of the project, going through the tasks
+        journals = Journal.objects.filter(task__in=tasks)
+        # get a dictionary containing all the actions made by the users member of the project
+        project.actions = journals.values('author').annotate(count=Count('author'))
+        print(project.actions)
+        print(project)
+
+    # get all the users part of the projects that can be seen by the authenticated user
+    users = User.objects.filter(projets__in=projects).distinct()
+    user = users[0]
+    for user in users:
+        user.list = []
+        for project in projects:
+            print(project.name)
+            print(project.actions)
+            if len(project.actions) == 0:
+                user.list.append(0)
+            for i in range(len(project.actions)):
+                if project.actions[i]['author'] == user.id:
+                    user.list.append(project.actions[i]['count'])
+                    break
+                if i == len(project.actions) - 1:
+                    user.list.append(0)
+        print(user.list)
+
     return render(request, "tachesrecentshome.html", locals())
 
 
+# page ACTIVITIES
 @login_required()
 def taches_recents(request, project_id):
     project = get_object_or_404(Projet, id=project_id)

@@ -31,10 +31,44 @@
             {% for project in projects %}
                 <li class="list-group-item list-group-item-action">
 
-                    <a class="custom_link" href="{% url "taches_recents" project.id %}" >{{project.name}}</a>
+                    <a class="custom_link" href="{% url "taches_recents" project.id %}">{{ project.name }}</a>
                 </li>
             {% endfor %}
         </ul>
     </div>
+
+
+    {# BAR CHART DIV #}
+    <div class="container mt-5" id="bar-chart"></div>
+    {# import highchart.js #}
+    <script src="https://code.highcharts.com/highcharts.src.js"></script>
+    <script>
+        Highcharts.chart('bar-chart', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Activity Diagram'
+            },
+            subtitle: {
+                text: 'Number of actions on the projects by user'
+            },
+            xAxis: {
+                categories: [{% for projet in projects %}'{{ projet.name }}', {% endfor %}]
+            },
+            series: [
+                {% for user in users %}
+                    {
+                        name: '{{ user.username }}',
+                        data: [ {% for i in user.list %}{{ i }}, {% endfor %}]
+                    },
+                {% endfor %}
+                {
+                    name: 'Year 1900',
+                    data: [ {% for i in user.list %}{{ i }}, {% endfor %}]
+                },
+            ]
+        });
+    </script>
 
 {% endblock %}
