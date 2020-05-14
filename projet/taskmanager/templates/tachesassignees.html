@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %} My Profile {% endblock %}
+{% block title %}- Stats {% endblock %}
 
 {% block to_remove_path %}{% endblock %}
 
@@ -35,15 +35,21 @@
                 <th>Due Date</th>
                 <th>Priority</th>
                 <th>Status</th>
-                <th>Latest mod.</th>
+                <th>Last mod.</th>
                 <th>Percent.</th>
             </tr>
             </thead>
             <tbody>
             {% for task in tasks %}
                 <tr>
-                    <td><a href="{% url 'task' task.id %}" style="color: black">{{ task.name }}</a></td>
-                    <td>{{ task.projet }}</td>
+
+                    <td>
+                        <div style="color: dodgerblue;cursor: pointer;" data-toggle="tooltip" data-placement="right" title="{{task.description}}">
+                            <a href="{% url 'task' task.id %}" style="color: black">{{ task.name }}</a>
+                        </div>
+                    </td>
+
+                    <td><a href="{% url 'project' task.projet.id %}" style="color: black">{{ task.projet }}</a></td>
                     <td>{{ task.start_date }}</td>
                     <td>{{ task.due_date }}</td>
                     <td>{{ task.priority }}</td>

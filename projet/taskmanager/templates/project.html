@@ -8,7 +8,7 @@
 {% block title %}- {{ project.name }} {% endblock %}
 
 {% block line_path %}
-    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projets</a></li>
+    <li class="breadcrumb-item"><a href="{% url "projects" %}">Projects</a></li>
     <li class="breadcrumb-item active"><a href="{% url "project" project.id %}">{{ project.name }}</a></li>
 {% endblock %}
 
@@ -16,7 +16,7 @@
     <h2 style="display: inline">{{ project.name }}</h2>
     <button id="filter_button" type="button" style="margin-left: 3%" class="btn btn-primary" data-toggle="modal" data-target="#filter-modal">Filter</button>
     <a class="custom_link" href="{% url "newtask" project.id %}">
-        <i data-toggle="tooltip" data-placement="left" title="Ajouter une tache" class="fas fa-plus-circle fa-3x"
+        <i data-toggle="tooltip" data-placement="left" title="Add a task" class="fas fa-plus-circle fa-3x"
            style="float: right;color: dodgerblue;"></i>
     </a>
 
@@ -26,7 +26,7 @@
         <div class="modal-content">
             <form id="filter-form" action="" method="get">
                 <div class="modal-header">
-                    <h4 class="modal-title">Modal Heading</h4>
+                    <h4 class="modal-title">Filters</h4>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
 
@@ -53,21 +53,12 @@
         <table id="table" class="table">
     <thead>
         <tr>
-            <th>Task
-
-            </th>
-            <th>Status
-
-            </th>
-            <th>Assignee
-
-            </th>
-            <th>Start Date
-
-            </th>
-            <th>Due Date
-
-            </th>
+            <th>Task</th>
+            <th>Status</th>
+            <th>Assignee</th>
+            <th>Start Date</th>
+            <th>Due Date</th>
+            <th>Priority</th>
         </tr>
     </thead>
     <tbody>
@@ -85,10 +76,12 @@
                     {% endif %}
                 {% endif %}
                 <td>{{task.start_date}}</td>
-                <td>{{task.due_date}}
+                <td>{{task.due_date}}</td>
+                <td>
+                    {{task.priority}}
                     <div style="float: right">
                         <a class="custom_link" href="{% url "edittask" task.id %}">
-                            <i data-toggle="tooltip" data-placement="left" title="Editer la tâche" class="fas fa-edit fa-2x" style="float: right;color: dodgerblue;"></i>
+                            <i data-toggle="tooltip" data-placement="left" title="Edit task" class="fas fa-edit fa-2x" style="float: right;color: dodgerblue;"></i>
                         </a>
                     </div>
                 </td>
@@ -123,14 +116,21 @@
 
 const compare = (ids, asc) => (row1, row2) => {
   const tdValue = (row, ids) => row.children[ids].textContent;
-  const tri = (v1, v2) => v1.toString().localeCompare(v2);
+  const tri = (v1, v2) => {
+      if (isNaN(v1) ||isNaN(v2)){
+          return v1.toString().localeCompare(v2);
+      }else{
+          return v1 - v2;
+      }
+
+  };
   return tri(tdValue(asc ? row1 : row2, ids), tdValue(asc ? row2 : row1, ids));
 };
 
 const mouth2int = (str) => {
-    if (str == 'January'){
+    if (str == 'Jan.'){
         return 1;
-    } else if (str == 'February'){
+    } else if (str == 'Feb.'){
         return 2;
     } else if (str == 'March'){
         return 3;
@@ -142,15 +142,15 @@ const mouth2int = (str) => {
         return 6;
     } else if (str == 'July'){
         return 7;
-    } else if (str == 'August'){
+    } else if (str == 'Aug.'){
         return 8;
-    } else if (str == 'September'){
+    } else if (str == 'Sept.'){
         return 9;
-    } else if (str == 'October'){
+    } else if (str == 'Oct.'){
         return 10;
-    } else if (str == 'November'){
+    } else if (str == 'Nov.'){
         return 11;
-    } else if (str == 'December'){
+    } else if (str == 'Dec.'){
         return 12;
     }
 }
