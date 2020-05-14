@@ -1,28 +1,32 @@
 {% extends "base.html" %}
+
 {% block title %} My Profile {% endblock %}
+
+{% block to_remove_path %}{% endblock %}
+
 {% block page %}
     <div class="container">
         <ul class="nav nav-tabs nav-justified">
             <li class="nav-item">
-                <a class="nav-link" href="{% url "myprofile" %}">Vos projets</a>
+                <a class="nav-link" href="{% url "myprofile" %}">Your Projects</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="{% url "taches_assignees" %}">Tâches assignés</a>
+                <a class="nav-link active" href="{% url "taches_assignees" %}">Your Tasks</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url "taches_terminees" %}">Tâches terminées</a>
+                <a class="nav-link" href="{% url "taches_terminees" %}">Finished Tasks</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url "taches_projets" %}">Tâches par projet</a>
+                <a class="nav-link" href="{% url "taches_projets" %}">Tasks by Projects</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{% url "taches_recents_home" %}">Tâches récentes</a>
+                <a class="nav-link" href="{% url "taches_recents_home" %}">Recent Tasks</a>
             </li>
         </ul>
     </div>
 
     <div class="container">
-        <table class="table table-striped">
+        <table class="table table-striped table-hover">
             <thead>
             <tr>
                 <th>Task</th>
@@ -31,101 +35,106 @@
                 <th>Due Date</th>
                 <th>Priority</th>
                 <th>Status</th>
+                <th>Latest mod.</th>
+                <th>Percent.</th>
             </tr>
             </thead>
             <tbody>
             {% for task in tasks %}
                 <tr>
-                    <td>{{ task.name }}</td>
+                    <td><a href="{% url 'task' task.id %}" style="color: black">{{ task.name }}</a></td>
                     <td>{{ task.projet }}</td>
                     <td>{{ task.start_date }}</td>
                     <td>{{ task.due_date }}</td>
                     <td>{{ task.priority }}</td>
                     <td>{{ task.status }}</td>
+                    <td>{{ task.last_modification|date }}</td>
+                    <td>{{ task.completion_percentage }} %</td>
                 </tr>
             {% endfor %}
             </tbody>
         </table>
     </div>
 
+    {% if tasks %}
+        {# GANT CHART CONTAINER #}
+        <div class="container" id="gantt"></div>
 
-    {# GANT CHART CONTAINER #}
-    <div class="container" id="gantt"></div>
+        {# import highcharts.js #}
+        <script src="https://code.highcharts.com/gantt/highcharts-gantt.js"></script>
+        <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
-    {# import highcharts.js #}
-    <script src="https://code.highcharts.com/gantt/highcharts-gantt.js"></script>
-    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+        <script>
 
-    <script>
+            var today = new Date(),
+                day = 1000 * 60 * 60 * 24,
+                // Utility functions
+                dateFormat = Highcharts.dateFormat,
+                defined = Highcharts.defined,
+                isObject = Highcharts.isObject,
+                reduce = Highcharts.reduce;
 
-        var today = new Date(),
-            day = 1000 * 60 * 60 * 24,
-            // Utility functions
-            dateFormat = Highcharts.dateFormat,
-            defined = Highcharts.defined,
-            isObject = Highcharts.isObject,
-            reduce = Highcharts.reduce;
+            // Set to 00:00:00:000 today
+            today.setUTCHours(0);
+            today.setUTCMinutes(0);
+            today.setUTCSeconds(0);
+            today.setUTCMilliseconds(0);
+            today = today.getTime();
 
-        // Set to 00:00:00:000 today
-        today.setUTCHours(0);
-        today.setUTCMinutes(0);
-        today.setUTCSeconds(0);
-        today.setUTCMilliseconds(0);
-        today = today.getTime();
+            {# Gantt chart #}
+            Highcharts.ganttChart('gantt', {
 
-        {# Gantt chart #}
-        Highcharts.ganttChart('gantt', {
-
-            title: {
-                text: 'Gantt Chart with Task Progress'
-            },
-
-            xAxis: {
-                currentDateIndicator: true,
-                min: today - 10 * day,
-                max: today + 20 * day
-            },
-
-            navigator: {
-                enabled: true,
-                liveRedraw: true,
-                series: {
-                    type: 'gantt',
-                    pointPlacement: 0.5,
-                    pointPadding: 0.25
+                title: {
+                    text: 'Gantt Chart with Task Progress'
                 },
-                yAxis: {
-                    reversed: true,
-                    categories: [],
-                    min: 0,
-                    max: 10,
+
+                xAxis: {
+                    currentDateIndicator: true,
+                    min: today - 10 * day,
+                    max: today + 20 * day
                 },
-            },
-            scrollbar: {
-                enabled: true
-            },
-            rangeSelector: {
-                enabled: true,
-                selected: 0
-            },
 
-            series: [{
-                name: 'My tasks',
-                data: [
-                    {% for task in tasks %}
-                        {
-                            start: Date.UTC({{ task.start_date|date:"Y" }}, {{ task.start_date|date:"n" }}, {{ task.start_date|date:"j" }}),
-                            end: Date.UTC({{ task.due_date|date:"Y" }}, {{ task.due_date|date:"n" }}, {{ task.due_date|date:"j" }}),
-                            completed: {{ task.completion_percentage }}/100,
-                            name: '{{ task.name }}',
-                            project: '{{ task.projet }}',
-                        },
-                    {% endfor %}
+                navigator: {
+                    enabled: true,
+                    liveRedraw: true,
+                    series: {
+                        type: 'gantt',
+                        pointPlacement: 0.5,
+                        pointPadding: 0.25
+                    },
+                    yAxis: {
+                        reversed: true,
+                        categories: [],
+                        min: 0,
+                        max: 10,
+                    },
+                },
+                scrollbar: {
+                    enabled: true
+                },
+                rangeSelector: {
+                    enabled: true,
+                    selected: 0
+                },
+
+                series: [{
+                    name: 'My tasks',
+                    data: [
+                        {% for task in tasks %}
+                            {
+                                start: Date.UTC({{ task.start_date|date:"Y" }}, {{ task.start_date|date:"n" }}, {{ task.start_date|date:"j" }}),
+                                end: Date.UTC({{ task.due_date|date:"Y" }}, {{ task.due_date|date:"n" }}, {{ task.due_date|date:"j" }}),
+                                completed: {{ task.completion_percentage }}/100,
+                                name: '{{ task.name }}',
+                                project: '{{ task.projet }}',
+                            },
+                        {% endfor %}
 
 
-                ]
-            }],
+                    ]
+                }],
 
-        });
-    </script>
+            });
+        </script>
+    {% endif %}
 {% endblock %}
