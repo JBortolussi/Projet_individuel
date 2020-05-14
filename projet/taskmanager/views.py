@@ -437,7 +437,7 @@ def my_profile(request):
         # number by the number of tasks, if the task number is above 0 to avoid numeric troubles
         if tasks_number > 0:
             project.completion_percentage = project.task_set.all().aggregate(
-            sum=Sum('completion_percentage'))['sum'] / tasks_number
+                sum=Sum('completion_percentage'))['sum'] / tasks_number
         else:
             project.completion_percentage = 0
 
@@ -483,28 +483,35 @@ def taches_recents_home(request):
         tasks = project.task_set.all()
         # get the journals of the project, going through the tasks
         journals = Journal.objects.filter(task__in=tasks)
-        # get a dictionary containing all the actions made by the users member of the project
+        # get a queryset which entris are dictionary containing the number of actions made by all the users that are members of the project
         project.actions = journals.values('author').annotate(count=Count('author'))
         print(project.actions)
         print(project)
 
     # get all the users part of the projects that can be seen by the authenticated user
     users = User.objects.filter(projets__in=projects).distinct()
-    user = users[0]
+    # build a list for each user that contains how many actions he/she has done in a particular project
+    # It's not optimized at all this part of the code, but I didn't find a better solution using Django's database
+    # requests during the time that I had to make this chart work (that's a compromise but it should work)
+    # I didn't test it that much. If it creates some BUGS please delete it [MICHELE]
     for user in users:
+        # build an empty list for the user that will be updated with the number of actions per project done by him
         user.list = []
         for project in projects:
             print(project.name)
             print(project.actions)
-            if len(project.actions) == 0:
+            if len(project.actions) == 0:  # it means that nobody has added a journal yet to the any task of the project
                 user.list.append(0)
-            for i in range(len(project.actions)):
-                if project.actions[i]['author'] == user.id:
-                    user.list.append(project.actions[i]['count'])
+            for i in range(len(project.actions)):       # check in the queryset if there exists a a voice author that corresponds to that user
+                if project.actions[i]['author'] == user.id:     # it means that we found an entry in the queryset that corresponds to that user, and so it means that he has done an action in that project
+                    user.list.append(project.actions[i]['count'])   # append to the list the number of actions he has done
                     break
-                if i == len(project.actions) - 1:
-                    user.list.append(0)
+                if i == len(project.actions) - 1:       # if after having gone through all the queryset nothing has been found, it means that this user has not done any action for that project,
+                    user.list.append(0)                 # so put a zero
         print(user.list)
+    # in the end I need to build this list because the chart asks for as many "data" numbers as the number of the projects in the page
+    # so I need to put a zero not only if the user has not added yet a journal to that project, but also if he is not member
+    # of that project at all
 
     return render(request, "tachesrecentshome.html", locals())
 
