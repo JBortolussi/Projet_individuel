@@ -181,14 +181,14 @@ function add_input(id=-1) {
     $("#filter-del-" + input_number).tooltip();
 }
 
-function remove_OR_AND(id) {
+function remove_OR_AND(method, id) {
     let row = document.getElementById("filter-row-" + id);
     $("#filter-del-" + id).tooltip('dispose');
     let parent = row.parentNode;
 
     let div = document.getElementById("div-input-" + id);
     let hr = document.getElementById("hr-" + id);
-    let end_or = document.getElementById('input_end_or-' + id)
+    let end_or = document.getElementById('input_end_' + method + '-' + id);
 
     parent.removeChild(row);
     parent.removeChild(div);
@@ -212,7 +212,7 @@ function add_OR_AND(id=-1, method) {
     del.setAttribute('title', 'Remove filter');
     del.setAttribute('class', "fas fa-times fa-2x");
     del.style.color = 'tomato';
-    del.setAttribute('onclick', "remove_OR_AND(" + input_number + ")");
+    del.setAttribute('onclick', "remove_OR_AND(" + '\'' + method + '\'' + ',' + input_number + ")");
 
     let add = document.createElement("I");
     add.setAttribute('id', "filter-del-" + input_number);
@@ -231,6 +231,13 @@ function add_OR_AND(id=-1, method) {
     or.style.marginLeft = "10px";
     or.setAttribute('onclick', "add_OR_AND(" + input_number + ", \'or\' )");
 
+    let and =document.createElement("INPUT");
+    and.setAttribute('type', 'button');
+    and.setAttribute('class', 'btn btn-primary');
+    and.setAttribute('value', 'AND');
+    and.style.marginLeft = "10px";
+    and.setAttribute('onclick', "add_OR_AND(" + input_number + ", \'and\' )");
+
     let input = document.createElement("INPUT");
     input.setAttribute('id', 'input_' + method + '-' + input_number);
     input.setAttribute('name', 'input_' + method + '-' + input_number);
@@ -247,7 +254,7 @@ function add_OR_AND(id=-1, method) {
 
     let col_l = document.createElement("DIV");
     col_l.setAttribute('class', 'col-sm-3');
-    col_l.innerHTML = "<hr>";
+    col_l.innerHTML = "<hr color='grey'>";
 
     let col_m = document.createElement('DIV');
     col_m.setAttribute('class', 'col-sm-2');
@@ -256,20 +263,21 @@ function add_OR_AND(id=-1, method) {
 
     let col_r = document.createElement("DIV");
     col_r.setAttribute('class', 'col-sm-3');
-    col_r.innerHTML = "<hr>";
+    col_r.innerHTML = "<hr color='grey'>";
 
     let col_del = document.createElement("DIV");
-    col_del.setAttribute('class', 'col-sm-2');
+    col_del.setAttribute('class', 'col-sm-3');
     col_del.appendChild(del);
     col_del.appendChild(add);
     col_del.appendChild(or);
+    col_del.appendChild(and);
 
     let div_input = document.createElement("DIV");
     div_input.setAttribute('id', "div-input-" + input_number);
 
 
     let hr = document.createElement("DIV");
-    hr.innerHTML = "<hr>";
+    hr.innerHTML = "<hr color='grey'>";
     hr.setAttribute('id', 'hr-' + input_number);
 
     row.appendChild(input);
