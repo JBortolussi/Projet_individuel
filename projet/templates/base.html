@@ -22,6 +22,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
 
+    {% block links %}{% endblock %}
+
 </head>
 
 <body style="padding-top: 56px">
@@ -123,7 +125,9 @@
 <script>
     // script that allow bootstratp tooltip to work properly
     $(document).ready(function () {
-        $('[data-toggle="tooltip"]').tooltip();
+        $('[data-toggle="tooltip"]').tooltip({
+    trigger : 'hover'
+  });
     });
     // Allow following templates to have their own scripts.
     // Be aware that the script tags are no more required in this block.

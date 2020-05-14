@@ -130,7 +130,102 @@ def edit_project_view(request, project_id):
         return render(request, 'newProject.html', locals())
     else:
         return redirect("projects")
+    return redirect("projects")
 
+
+def add_filter(filters, entry):
+    method = entry[1]
+    value = entry[2]
+    link = entry[0]
+
+    if method == 'assign':
+        if link == "and":
+            filters &= Q(assignee__id=value)
+        else:
+            filters |= Q(assignee__id=value)
+    elif method == 'not_assign':
+        if link == "and":
+            filters &= ~Q(assignee__id=value)
+        else:
+            filters |= ~Q(assignee__id=value)
+    elif method == 'status':
+        if link == "and":
+            filters &= Q(status__id=value)
+        else:
+            filters |= Q(status__id=value)
+    elif method == 'not_status':
+        if link == "and":
+            filters &= ~Q(status__id=value)
+        else:
+            filters |= ~Q(status__id=value)
+    elif method == 'start_before':
+        if link == "and":
+            filters &= Q(start_date__lte=value)
+        else:
+            filters |= Q(start_date__lte=value)
+    elif method == 'start_after':
+        if link == "and":
+            filters &= Q(start_date__gte=value)
+        else:
+            filters |= Q(start_date__gte=value)
+    elif method == 'end_before':
+        if link == "and":
+            filters &= Q(due_date__lte=value)
+        else:
+            filters |= Q(due_date__lte=value)
+    elif method == 'end_after':
+        if link == "and":
+            filters &= Q(due_date__gte=value)
+        else:
+            filters |= Q(due_date__gte=value)
+
+    return filters
+
+
+def creat_filters_rec(project, filter_dic, filter_id_tab):
+
+    type = ''
+    filters = Q()
+    skip = 0
+    id_sub_tab = []
+    for i in range(len(filter_id_tab)):
+        id = filter_id_tab[i]
+
+        if (skip != 0):
+            if (skip != 1):
+                id_sub_tab.append(id)
+            elif (not ((type == 'or') and ('input_end_or-' in id))) and (not ((type == 'and') and ('input_end_and-' in id))):
+                id_sub_tab.append(id)
+        elif not (('input_or-' in id) or ('input_and-' in id)):
+            filters = add_filter(filters, filter_dic[id])
+
+        if ('input_or-' in id) and (type != 'and'):
+            type = 'or'
+            skip += 1
+
+        if ('input_and-' in id) and (type != 'or'):
+            type = 'and'
+            skip += 1
+
+        if ('input_end_or-' in id) and (type == 'or'):
+            skip -= 1
+            if skip == 0:
+                filter_temp = creat_filters_rec(project, filter_dic, id_sub_tab)
+                set_temp = project.task_set.filter(filter_temp)
+                filters |= Q(pk__in=set_temp)
+                id_sub_tab = []
+                type = ''
+
+        if ('input_end_and-' in id) and (type == 'and'):
+            skip -= 1
+            if skip == 0:
+                filter_temp = creat_filters_rec(project, filter_dic, id_sub_tab)
+                set_temp = project.task_set.filter(filter_temp)
+                filters &= Q(pk__in=set_temp)
+                id_sub_tab = []
+                type = ''
+
+    return filters
 
 @login_required()
 def project_view(request, project_id):
@@ -150,24 +245,44 @@ def project_view(request, project_id):
     if request.method == 'GET':
 
         filters = Q()
+        list_of_key = []
+        query_string = request.META['QUERY_STRING']
+        query_tab = query_string.split('&')
+        filter_id_tab = []
+        filter_dic = {}
 
-        for key in request.GET:
-            entry = request.GET.getlist(key)
+        print(query_tab)
 
-            method = entry[0]
-            value = entry[1]
-            link = entry[2]
+        if (query_tab != ['']):
+            for query in query_tab:
+                query_arg = query.split('=')
+                id = query_arg[0]
 
-            if method == 'assign':
-                if link == "and":
-                    filters &= Q(assignee__id=value)
-                else:
-                    filters |= Q(assignee__id=value)
-            elif method == 'not_assign':
-                if link == "and":
-                    filters &= ~Q(assignee__id=value)
-                else:
-                    filters |= ~Q(assignee__id=value)
+                if not (id in filter_id_tab):
+                    filter_id_tab.append(id)
+                try:
+                    filter_dic[id].append(query_arg[1])
+                except KeyError:
+                    filter_dic[id] = [query_arg[1]]
+
+            for key in request.GET:
+                list_of_key.append(key)
+
+            print(list_of_key)
+            filters = creat_filters_rec(project, filter_dic, filter_id_tab)
+        else:
+            filters = Q()
+
+        #
+        # for key in filter_id_tab:
+        #
+        #
+        #     entry = filter_dic[key]
+        #
+        #     if (len(entry) != 3):
+        #         continue
+        #
+        #     filters = add_filter(filters, entry)
 
         tasks = project.task_set.filter(filters).order_by('-priority')
     else:
@@ -176,6 +291,7 @@ def project_view(request, project_id):
 
     # Check if the logged in user is allowed to see this project
     if request.user.has_perm('taskmanager.{}_project_permission'.format(project.id)):
+        status = Status.objects.all()
         users = project.members.all()
         return render(request, 'project.html', locals())
     else:
