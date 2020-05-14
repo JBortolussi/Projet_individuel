@@ -15,7 +15,7 @@ from django.contrib.auth.decorators import login_required
 
 # models
 from django.contrib.auth.models import User
-from django.db.models import Q
+from django.db.models import Q, Sum
 from .models import Projet, Task, Journal, Status
 
 # forms
@@ -183,7 +183,6 @@ def add_filter(filters, entry):
 
 
 def creat_filters_rec(project, filter_dic, filter_id_tab):
-
     type = ''
     filters = Q()
     skip = 0
@@ -194,7 +193,8 @@ def creat_filters_rec(project, filter_dic, filter_id_tab):
         if (skip != 0):
             if (skip != 1):
                 id_sub_tab.append(id)
-            elif (not ((type == 'or') and ('input_end_or-' in id))) and (not ((type == 'and') and ('input_end_and-' in id))):
+            elif (not ((type == 'or') and ('input_end_or-' in id))) and (
+            not ((type == 'and') and ('input_end_and-' in id))):
                 id_sub_tab.append(id)
         elif not (('input_or-' in id) or ('input_and-' in id)):
             filters = add_filter(filters, filter_dic[id])
@@ -226,6 +226,7 @@ def creat_filters_rec(project, filter_dic, filter_id_tab):
                 type = ''
 
     return filters
+
 
 @login_required()
 def project_view(request, project_id):
@@ -370,6 +371,7 @@ def newtask_view(request, project_id):
                 task = form.save(commit=True)
                 task.last_modification = datetime.datetime.now()  # it's probably not necessary
                 task.save()
+
                 return redirect("task", task_id=task.id)
         else:
             # Pass project to the form. Set the task's project fields with this project (initialize and never modify)
@@ -407,6 +409,7 @@ def edittask_view(request, task_id):
                 task.id = task_id
                 task.last_modification = datetime.datetime.now()
                 task.save()
+
                 return redirect("task", task_id=task.id)
         else:
             # Initialize the form with the task
@@ -418,17 +421,27 @@ def edittask_view(request, task_id):
 
 @login_required()
 def my_profile(request):
-    projects = request.user.projets.all()   # queryset
+    projects = request.user.projets.all()  # queryset
 
 
-    # PIE CHART (TASKS BY PROJECT and MEMBERS BY PROJECT)
+    # PIE CHARTS (TASKS BY PROJECT and MEMBERS BY PROJECT)
     labels = []
     data_TBP = []
     data_MBP = []
 
     for project in projects:
+        # used in the progress bar
+        project.completed_tasks = project.task_set.filter(status__name='Finished')
+        # calculate the project progress
+        tasks_number = project.task_set.all().count()  # count all the tasks in this project
+        # get all the completion percentage of all the tasks in this project, sum them all and then divide this
+        # number by the number of tasks
+        project.completion_percentage = project.task_set.all().aggregate(
+            sum=Sum('completion_percentage'))['sum'] / tasks_number
+
+        # the following is used in the charts
         labels.append(project.name)
-        data_TBP.append(project.task_set.all().count())
+        data_TBP.append(project.task_set.all().count()) # appends data to the lists used for the pie charts
         data_MBP.append(project.members.all().count())
 
     chart_elements = range(len(labels))
