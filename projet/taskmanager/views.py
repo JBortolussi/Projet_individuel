@@ -336,7 +336,7 @@ def task_view(request, task_id):
             # initialize a new form
             form = JournalForm()
         # Get the Journal entries linked with the task
-        entries = Journal.objects.filter(task__id=task_id)
+        entries = Journal.objects.filter(task__id=task_id).order_by('-date')
         return render(request, "task.html", locals())
     else:
         # redirect to the linked project to the project list page if the user is not allowed to see the task
